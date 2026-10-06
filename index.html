@@ -309,7 +309,7 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
           <div class="field"><label for="co">Αναχώρηση</label><input type="date" id="co" required></div>
           <div class="field"><label for="guests">Επισκέπτες</label>
             <select id="guests"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
-          <div class="field"><label for="room">Σουίτα</label><select id="room"></select></div>
+          <div class="field"><label for="room">Δωμάτιο</label><select id="room"></select></div>
         </div>
         <p class="err" id="e1" role="alert"></p>
         <button class="btn btn-primary" type="submit">Έλεγχος διαθεσιμότητας</button>
@@ -452,7 +452,7 @@ show((location.hash||"#home").slice(1),false);
 const ph=(src,label,alt)=>src?`<div class="ph"><img src="${src}" alt="${alt||label}" loading="lazy"></div>`:`<div class="ph empty"><div><img src="img/mark.png" alt="">${label}</div></div>`;
 const photos=(list,labels,n,alt)=>Array.from({length:Math.max(n,list.length)},(_,i)=>ph(list[i],labels[i%labels.length],alt)).join("");
 $("#barGallery").innerHTML=photos(BAR_PHOTOS,BAR_LABELS,6,"Giardino espresso & wine bar");
-$("#roomList").innerHTML=ROOMS.map(r=>`<article class="room"><div class="pic">${photos(r.photos.slice(0,3),["Φωτογραφία σουίτας"],3,r.name)}</div><div class="body"><h3>${r.name}</h3><p style="color:var(--muted);font-size:.95rem">${r.desc}</p><ul>${r.tags.map(t=>`<li>${t}</li>`).join("")}</ul><div class="meta"><span>Έως ${r.cap} άτομα · ${r.size}</span><button type="button" data-book="${r.id}">Κράτηση →</button></div></div></article>`).join("");
+$("#roomList").innerHTML=ROOMS.map(r=>`<article class="room"><div class="pic">${photos(r.photos.slice(0,3),["Φωτογραφία δωματίου"],3,r.name)}</div><div class="body"><h3>${r.name}</h3><p style="color:var(--muted);font-size:.95rem">${r.desc}</p><ul>${r.tags.map(t=>`<li>${t}</li>`).join("")}</ul><div class="meta"><span>Έως ${r.cap} άτομα · ${r.size}</span><button type="button" data-book="${r.id}">Κράτηση →</button></div></div></article>`).join("");
 $("#room").innerHTML=ROOMS.map(r=>`<option value="${r.id}">${r.name} (έως ${r.cap})</option>`).join("");
 document.addEventListener("click",e=>{const b=e.target.closest("[data-book]");if(!b)return;$("#room").value=b.dataset.book;show("availability")});
 
@@ -471,7 +471,7 @@ $("#f1").addEventListener("submit",e=>{
   if(ci<iso(today)) return $("#e1").textContent="Η άφιξη δεν μπορεί να είναι σε παρελθοντική ημερομηνία.";
   const n=Math.round((new Date(co)-new Date(ci))/864e5);
   if(n<1) return $("#e1").textContent="Η αναχώρηση πρέπει να είναι τουλάχιστον μία μέρα μετά την άφιξη.";
-  if(g>r.cap) return $("#e1").textContent=`Η ${r.name} φιλοξενεί έως ${r.cap} άτομα. Επιλέξτε άλλη σουίτα ή λιγότερους επισκέπτες.`;
+  if(g>r.cap) return $("#e1").textContent=`Το ${r.name} φιλοξενεί έως ${r.cap} άτομα. Επιλέξτε άλλο δωμάτιο ή λιγότερους επισκέπτες.`;
   booking={ci,co,n,g,r};
   $("#availBox").innerHTML=`<span class="eyebrow">Υπάρχει διαθεσιμότητα</span><b>${r.name}</b><span>${fmt(ci)} → ${fmt(co)} · ${n} ${n===1?"νύχτα":"νύχτες"} · ${g} ${g===1?"άτομο":"άτομα"}</span>`;
   $("#f1").hidden=true;$("#avail").hidden=false;setStep(2);$("#fn").focus();
@@ -486,7 +486,7 @@ $("#f2").addEventListener("submit",e=>{
   if(!$("#ok").checked) return $("#e2").textContent="Χρειάζεται η συγκατάθεσή σας για να προχωρήσουμε.";
   const ref="GD-"+Date.now().toString(36).toUpperCase().slice(-6);
   $("#dName").textContent=fn;$("#dRef").textContent=ref;
-  $("#dSum").innerHTML=[["Σουίτα",booking.r.name],["Άφιξη",fmt(booking.ci)+" · "+$("#eta").value],["Αναχώρηση",fmt(booking.co)],["Νύχτες",booking.n],["Επισκέπτες",booking.g],["Email",em],["Τηλέφωνο",ph]].map(([k,v])=>`<dt>${k}</dt><dd>${String(v).replace(/</g,"&lt;")}</dd>`).join("");
+  $("#dSum").innerHTML=[["Δωμάτιο",booking.r.name],["Άφιξη",fmt(booking.ci)+" · "+$("#eta").value],["Αναχώρηση",fmt(booking.co)],["Νύχτες",booking.n],["Επισκέπτες",booking.g],["Email",em],["Τηλέφωνο",ph]].map(([k,v])=>`<dt>${k}</dt><dd>${String(v).replace(/</g,"&lt;")}</dd>`).join("");
   $("#avail").hidden=true;$("#done").hidden=false;setStep(3);
 });
 $("#again").onclick=()=>{$("#f2").reset();$("#done").hidden=true;$("#f1").hidden=false;setStep(1)};
