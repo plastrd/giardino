@@ -63,14 +63,6 @@
     </div>
   </div>
   </div>
-  <div class="wrap">
-    <div class="facts">
-      <div><b data-i18n="facts.1b"></b><span data-i18n="facts.1s"></span></div>
-      <div><b data-i18n="facts.2b"></b><span data-i18n="facts.2s"></span></div>
-      <div><b data-i18n="facts.3b"></b><span data-i18n="facts.3s"></span></div>
-      <div><b data-i18n="facts.4b"></b><span data-i18n="facts.4s"></span></div>
-    </div>
-  </div>
   <section>
     <div class="wrap">
       <div class="sec-head"><p class="eyebrow" data-i18n="home.eyebrow"></p></div>
@@ -79,6 +71,17 @@
         <a class="tile" href="#bar" data-go="bar"><h3 data-i18n="tile.2h"></h3><p data-i18n="tile.2p"></p><span class="go" data-i18n="tile.2go"></span></a>
         <a class="tile" href="#tourism" data-go="tourism"><h3 data-i18n="tile.3h"></h3><p data-i18n="tile.3p"></p><span class="go" data-i18n="tile.3go"></span></a>
       </div>
+    </div>
+  </section>
+  <section class="ig-sec">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Instagram</p>
+        <h2 data-i18n="ig.h2"></h2>
+        <a class="ig-handle" href="https://www.instagram.com/giardino.drama/" target="_blank" rel="noopener">@giardino.drama</a>
+      </div>
+      <div class="ig-grid" id="igGrid" aria-live="polite"></div>
+      <a class="btn btn-primary" href="https://www.instagram.com/giardino.drama/" target="_blank" rel="noopener" data-i18n="ig.btn"></a>
     </div>
   </section>
 </div>
@@ -146,7 +149,7 @@
         <h3 class="done-title"><span data-i18n="done.thanks"></span> <span id="dName"></span>.</h3>
         <dl class="summary" id="dSum"></dl>
         <p class="done-note"><span data-i18n="done.note"></span> <span class="ref" id="dRef"></span></p>
-        <button class="btn btn-ghost" type="button" id="again" class="again-btn" data-i18n="done.again"></button>
+        <button class="btn btn-ghost again-btn" type="button" id="again" data-i18n="done.again"></button>
       </div>
     </div>
   </div></section>
@@ -208,7 +211,7 @@
 </div></section>
 </main>
 
-<!-- room photo lightbox -->
+<!-- photo lightbox (rooms & bar) -->
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
   <div class="lb-top"><span class="lb-title" id="lbTitle"></span><span class="lb-count" id="lbCount"></span><button type="button" class="lb-close" id="lbClose" data-i18n-attr="aria-label:lb.close">×</button></div>
   <div class="lb-stage" id="lbStage">
@@ -247,11 +250,8 @@ el:{
   "nav.menu":"Μενού","nav.aria":"Κύριο μενού",
   "nav.home":"Αρχική","nav.rooms":"Δωμάτια","nav.avail":"Διαθεσιμότητα","nav.bar":"Καφέ &amp; Bar","nav.tour":"Τουρισμός στη Δράμα",
   "hero.eyebrow":"Δράμα · Ευξείνου Πόντου 22","hero.cta1":"Έλεγχος διαθεσιμότητας","hero.cta2":"Δείτε τα δωμάτια",
-  "facts.1b":"Δωμάτια","facts.1s":"Ευρύχωρα, πλήρως εξοπλισμένα",
-  "facts.2b":"Coffee &amp; Bar","facts.2s":"Πρωινό, Καφές, Κρασί",
-  "facts.3b":"Εκδηλώσεις","facts.3s":"Δεξιώσεις, live &amp; private events",
-  "facts.4b":"Δράμα","facts.4s":"Ευξείνου Πόντου 22",
   "home.eyebrow":"Στο Giardino",
+  "ig.h2":"Ακολουθήστε μας","ig.btn":"Ακολουθήστε μας στο Instagram ↗","ig.post":"Ανάρτηση στο Instagram",
   "tile.1h":"Δωμάτια","tile.1p":"Δωμάτια με ησυχία, άνεση και όλα όσα χρειάζεστε για σύντομη ή μεγαλύτερη διαμονή.","tile.1go":"Τα δωμάτια →",
   "tile.2h":"Καφέ &amp; Bar","tile.2p":"Ο κάτω χώρος φιλοξενεί δεξιώσεις, live βραδιές και ιδιωτικές εκδηλώσεις.","tile.2go":"Το bar →",
   "tile.3h":"Τουρισμός στη Δράμα","tile.3p":"Ιδέες για να γνωρίσετε την πόλη και τη γύρω περιοχή κατά τη διαμονή σας.","tile.3go":"Εξερευνήστε →",
@@ -269,7 +269,7 @@ el:{
   "f.send":"Αποστολή κράτησης","f.back":"Αλλαγή ημερομηνιών",
   "done.eyebrow":"Η αίτηση καταχωρήθηκε","done.thanks":"Ευχαριστούμε,","done.note":"Θα λάβετε επιβεβαίωση στο email σας. Κωδικός αίτησης:","done.again":"Νέα κράτηση",
   "bar.eyebrow":"Καφέ &amp; Bar · ισόγειο","bar.h1":"Καφές","bar.h1v":"πρωί – απόγευμα","bar.h2v":"απόγευμα – βράδυ","bar.h3":"Εκδηλώσεις","bar.h3v":"κατόπιν συνεννόησης",
-  "bar.galleryAria":"Φωτογραφίες από το καφέ και το bar",
+  "bar.galleryAria":"Φωτογραφίες από το καφέ και το bar","lb.bar":"Καφέ & Bar",
   "ev.1e":"Δεξιώσεις","ev.1h":"Βαφτίσεις, επέτειοι, γιορτές","ev.1p":"Οργανώνουμε τη δεξίωσή σας στον χώρο του bar, με καφέ, κρασί και μενού προσαρμοσμένο σε εσάς.",
   "ev.2h":"Μουσικές βραδιές","ev.2p":"Ακουστικά live, DJ sets και βραδιές γευσιγνωσίας κρασιού. Το πρόγραμμα ανακοινώνεται στο Facebook και στο Instagram.",
   "ev.3h":"Ο χώρος μόνο για εσάς","ev.3p":"Γενέθλια, εταιρικές συναντήσεις, παρουσιάσεις. Κλείστε ολόκληρο τον χώρο για τη δική σας εκδήλωση.",
@@ -306,11 +306,8 @@ en:{
   "nav.menu":"Menu","nav.aria":"Main menu",
   "nav.home":"Home","nav.rooms":"Rooms","nav.avail":"Check Availability","nav.bar":"Coffee &amp; Bar","nav.tour":"Tourism in Drama",
   "hero.eyebrow":"Drama · 22 Efxeinou Pontou","hero.cta1":"Check availability","hero.cta2":"See the rooms",
-  "facts.1b":"Rooms","facts.1s":"Spacious, fully equipped",
-  "facts.2b":"Coffee &amp; Bar","facts.2s":"Breakfast, coffee, wine",
-  "facts.3b":"Events","facts.3s":"Receptions, live &amp; private events",
-  "facts.4b":"Drama","facts.4s":"22 Efxeinou Pontou",
   "home.eyebrow":"At Giardino",
+  "ig.h2":"Follow us","ig.btn":"Follow us on Instagram ↗","ig.post":"Instagram post",
   "tile.1h":"Rooms","tile.1p":"Quiet, comfortable rooms with everything you need for a short or longer stay.","tile.1go":"The rooms →",
   "tile.2h":"Coffee &amp; Bar","tile.2p":"The ground-floor space hosts receptions, live nights and private events.","tile.2go":"The bar →",
   "tile.3h":"Tourism in Drama","tile.3p":"Ideas for getting to know the town and the surrounding area during your stay.","tile.3go":"Explore →",
@@ -328,7 +325,7 @@ en:{
   "f.send":"Send booking request","f.back":"Change dates",
   "done.eyebrow":"Request received","done.thanks":"Thank you,","done.note":"You'll receive a confirmation by email. Request code:","done.again":"New booking",
   "bar.eyebrow":"Coffee &amp; Bar · ground floor","bar.h1":"Coffee","bar.h1v":"morning – afternoon","bar.h2v":"afternoon – evening","bar.h3":"Events","bar.h3v":"by arrangement",
-  "bar.galleryAria":"Photos of the café and bar",
+  "bar.galleryAria":"Photos of the café and bar","lb.bar":"Coffee & Bar",
   "ev.1e":"Receptions","ev.1h":"Christenings, anniversaries, celebrations","ev.1p":"We host your reception in the bar, with coffee, wine and a menu tailored to you.",
   "ev.2h":"Music nights","ev.2p":"Acoustic live sets, DJ nights and wine tastings. The programme is announced on Facebook and Instagram.",
   "ev.3h":"The space, just for you","ev.3p":"Birthdays, business meetings, presentations. Book the whole space for your own event.",
@@ -379,6 +376,12 @@ const ROOMS=[
    en:{name:"Two-Bedroom Apartment",size:"2 bedrooms with double beds",tags:["2 bedrooms","Living room","COCO-MAT products","Coffee maker","Smart TV","Air conditioning"],desc:"Two separate bedrooms around a bright living room, with wooden floors and a coffee corner. Ideal for families or two couples."}}
 ];
 const BAR_PHOTOS=pics("bar","bar",PHOTO_COUNT.bar);
+
+/* ===== INSTAGRAM =====
+   Βάλτε εδώ το "Feed URL" από το behold.so (π.χ. "https://feeds.behold.so/AbCdEf123").
+   Όσο είναι κενό, εμφανίζεται μόνο το κουμπί "Ακολουθήστε μας". */
+const IG_FEED="";
+const IG_COUNT=6;
 const $=s=>document.querySelector(s);
 
 /* language */
@@ -427,7 +430,11 @@ $("#menuBtn").onclick=()=>{const o=$("#links").classList.toggle("open");$("#menu
 /* rooms & gallery */
 const ph=(src,label,alt)=>src?`<div class="ph"><img src="${src}" alt="${alt||label}" loading="lazy"></div>`:`<div class="ph empty"><div><img src="img/mark.png" alt="">${label}</div></div>`;
 const photos=(list,labels,n,alt)=>Array.from({length:Math.max(n,list.length)},(_,i)=>ph(list[i],labels[i%labels.length],alt)).join("");
-function renderBar(){$("#barGallery").innerHTML=photos(BAR_PHOTOS,t("barLabels"),6,"Giardino espresso & wine bar")}
+function renderBar(){
+  const n=BAR_PHOTOS.length;
+  if(!n){$("#barGallery").innerHTML=photos([],t("barLabels"),6);return}
+  $("#barGallery").innerHTML=BAR_PHOTOS.map((src,i)=>`<button type="button" class="ph" data-lb="bar" data-i="${i}" aria-label="${esc(t("lb.bar"))}: ${t("lb.open")(n,i+1)}"><img src="${src}" alt="Giardino espresso &amp; wine bar" loading="lazy"></button>`).join("");
+}
 function roomPics(r,name){
   const n=r.photos.length;
   return Array.from({length:3},(_,i)=>{
@@ -445,7 +452,7 @@ function renderRooms(){
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-book]");if(!b)return;$("#room").value=b.dataset.book;show("availability")});
 
-/* lightbox: all photos of the clicked room, arrows / keys / swipe */
+/* lightbox: all photos of the clicked room or of the bar, arrows / keys / swipe */
 const LB={list:[],i:0,name:"",from:null};
 function lbShow(i){
   const n=LB.list.length; LB.i=(i+n)%n;
@@ -456,8 +463,11 @@ function lbShow(i){
   [1,-1].forEach(d=>{const im=new Image();im.src=LB.list[(LB.i+d+n)%n]});
 }
 function lbOpen(id,i){
-  const r=ROOMS.find(x=>x.id===id); if(!r||!r.photos.length) return;
-  LB.list=r.photos; LB.name=R(r).name; LB.from=document.activeElement;
+  let list,name;
+  if(id==="bar"){list=BAR_PHOTOS;name=t("lb.bar")}
+  else{const r=ROOMS.find(x=>x.id===id);if(!r)return;list=r.photos;name=R(r).name}
+  if(!list.length) return;
+  LB.list=list; LB.name=name; LB.from=document.activeElement;
   $("#lbTitle").textContent=LB.name;
   $("#lbThumbs").innerHTML=LB.list.map((s,k)=>`<button type="button" data-k="${k}" aria-label="${t("lb.open")(LB.list.length,k+1)}"><img src="${s}" alt="" loading="lazy"></button>`).join("");
   $("#lb").classList.toggle("single",LB.list.length<2);
@@ -546,8 +556,25 @@ document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",(
 }));
 function sel(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}
 
+/* instagram feed (auto-updated via behold.so) */
+const attr=s=>esc(s).replace(/"/g,"&quot;");
+function loadIG(){
+  const g=$("#igGrid"); if(!IG_FEED) return;
+  fetch(IG_FEED).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{
+    const posts=(Array.isArray(d)?d:(d.posts||[])).slice(0,IG_COUNT);
+    g.innerHTML=posts.map(p=>{
+      const sz=p.sizes||{};
+      const src=(sz.medium&&sz.medium.mediaUrl)||(sz.small&&sz.small.mediaUrl)||(p.mediaType==="VIDEO"?p.thumbnailUrl:p.mediaUrl);
+      if(!src) return "";
+      const cap=(p.prunedCaption||p.caption||"").slice(0,120);
+      return `<a class="ig-item" href="${attr(p.permalink||"https://www.instagram.com/giardino.drama/")}" target="_blank" rel="noopener"><img src="${attr(src)}" alt="${attr(cap||t("ig.post"))}" loading="lazy"></a>`;
+    }).join("");
+  }).catch(()=>{g.innerHTML=""});
+}
+
 /* start */
 setLang(lang);
+loadIG();
 show((location.hash||"#home").slice(1),false);
 </script>
 </body>
