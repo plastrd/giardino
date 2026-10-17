@@ -1,10 +1,13 @@
-# Αντιγράψτε αυτό το αρχείο σε ".dev.vars" για τοπική δοκιμή (npx wrangler dev).
-# Το .dev.vars ΔΕΝ ανεβαίνει στο git (είναι στο .gitignore).
-
-HOSTHUB_API_KEY=βάλτε_εδώ_το_key_του_hosthub
-
-# Δοκιμαστικό secret του Turnstile — περνάει πάντα. Μόνο για τοπική δοκιμή.
-TURNSTILE_SECRET=1x0000000000000000000000000000000AA
-
-# Προαιρετικό: για emails επιβεβαίωσης
-# RESEND_API_KEY=re_xxxxx
+{
+  "name": "giardino",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "logs": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
