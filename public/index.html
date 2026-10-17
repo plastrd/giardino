@@ -25,6 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Commissioner:wght@300;400;500;600&display=swap">
 <link rel="stylesheet" href="css/style.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
 <header>
@@ -135,6 +136,7 @@
               <select id="eta"><option value="14:00–16:00">14:00–16:00</option><option value="16:00–18:00" selected>16:00–18:00</option><option value="18:00–20:00">18:00–20:00</option><option value="late" data-i18n="f.eta4"></option></select></div>
             <div class="field full"><label for="notes" data-i18n="f.notes"></label><textarea id="notes" data-i18n-attr="placeholder:f.notesPh"></textarea></div>
             <label class="check field full" for="ok"><input type="checkbox" id="ok"> <span data-i18n="f.ok"></span></label>
+            <div class="field full captcha" id="captcha"></div>
           </div>
           <p class="err" id="e2" role="alert"></p>
           <div class="btn-row">
@@ -295,6 +297,15 @@ el:{
   "e.name":"Συμπληρώστε όνομα και επώνυμο.","e.email":"Ελέγξτε το email, π.χ. onoma@example.com.",
   "e.phone":"Συμπληρώστε ένα τηλέφωνο με τουλάχιστον 10 ψηφία.","e.ok":"Χρειάζεται η συγκατάθεσή σας για να προχωρήσουμε.",
   "s.room":"Δωμάτιο","s.ci":"Άφιξη","s.co":"Αναχώρηση","s.nights":"Νύχτες","s.guests":"Επισκέπτες","s.phone":"Τηλέφωνο",
+  "a.total":"Σύνολο","a.checking":"Έλεγχος…","f.sending":"Αποστολή…","s.total":"Σύνολο",
+  "x.not_available":"Δεν υπάρχει διαθεσιμότητα για αυτές τις ημερομηνίες. Δοκιμάστε άλλες ημερομηνίες ή το άλλο διαμέρισμα.",
+  "x.min_stay":n=>`Για αυτή την ημερομηνία άφιξης η ελάχιστη διαμονή είναι ${n} νύχτες.`,
+  "x.no_rate":"Δεν έχουν ανοίξει ακόμα κρατήσεις για αυτές τις ημερομηνίες. Καλέστε μας να σας εξυπηρετήσουμε.",
+  "x.too_long":"Για διαμονή πάνω από 30 νύχτες καλέστε μας.",
+  "x.captcha":"Ολοκληρώστε την επαλήθευση πριν την αποστολή.",
+  "x.captcha_failed":"Η επαλήθευση απέτυχε. Δοκιμάστε ξανά.",
+  "x.taken":"Οι ημερομηνίες μόλις κλείστηκαν από άλλον επισκέπτη. Επιλέξτε άλλες ημερομηνίες.",
+  "x.server":"Κάτι πήγε στραβά. Δοκιμάστε ξανά ή καλέστε μας στο +30 2521 402133.",
   "eq.empty":"Αφήστε email ή τηλέφωνο για να σας απαντήσουμε.",
   "eq.ok":(t,c)=>`Το αίτημα για ${t.toLowerCase()} καταχωρήθηκε. Θα επικοινωνήσουμε μαζί σας στο ${c}.`,
   "barLabels":["Ο χώρος του καφέ","Το bar","Espresso","Κρασί","Εκδηλώσεις"]
@@ -351,6 +362,15 @@ en:{
   "e.name":"Please enter your first and last name.","e.email":"Check your email, e.g. name@example.com.",
   "e.phone":"Enter a phone number with at least 10 digits.","e.ok":"We need your consent to continue.",
   "s.room":"Room","s.ci":"Check-in","s.co":"Check-out","s.nights":"Nights","s.guests":"Guests","s.phone":"Phone",
+  "a.total":"Total","a.checking":"Checking…","f.sending":"Sending…","s.total":"Total",
+  "x.not_available":"There's no availability for these dates. Try other dates or the other apartment.",
+  "x.min_stay":n=>`For this check-in date the minimum stay is ${n} nights.`,
+  "x.no_rate":"Bookings for these dates aren't open yet. Please call us and we'll help.",
+  "x.too_long":"For stays longer than 30 nights, please call us.",
+  "x.captcha":"Please complete the verification before sending.",
+  "x.captcha_failed":"Verification failed. Please try again.",
+  "x.taken":"These dates were just booked by another guest. Please choose other dates.",
+  "x.server":"Something went wrong. Please try again or call us on +30 2521 402133.",
   "eq.empty":"Leave an email or phone number so we can reply.",
   "eq.ok":(t,c)=>`Your request for a ${t.toLowerCase()} has been received. We'll contact you at ${c}.`,
   "barLabels":["The café","The bar","Espresso","Wine","Events"]
@@ -382,6 +402,12 @@ const BAR_PHOTOS=pics("bar","bar",PHOTO_COUNT.bar);
    Όσο είναι κενό, εμφανίζεται μόνο το κουμπί "Ακολουθήστε μας". */
 const IG_FEED="";
 const IG_COUNT=6;
+
+/* ===== ΚΡΑΤΗΣΕΙΣ (Hosthub μέσω Cloudflare Worker) =====
+   TURNSTILE_SITEKEY: το "Site Key" από Cloudflare → Turnstile.
+   Το "1x00000000000000000000AA" είναι το δοκιμαστικό κλειδί του Cloudflare (περνάει πάντα) –
+   ΑΛΛΑΞΤΕ το πριν βγει το site στον αέρα. */
+const TURNSTILE_SITEKEY="1x00000000000000000000AA";
 const $=s=>document.querySelector(s);
 
 /* language */
@@ -501,16 +527,55 @@ $("#ci").min=iso(today);$("#co").min=iso(today);$("#ci").value=iso(t1);$("#co").
 const fmt=s=>new Date(s+"T12:00").toLocaleDateString(lang==="en"?"en-GB":"el-GR",{weekday:"short",day:"numeric",month:"long",year:"numeric"});
 const etaText=()=>{const o=$("#eta").selectedOptions[0];return o?o.textContent:""};
 let booking={};
+const money=(v,cur)=>new Intl.NumberFormat(lang==="en"?"en-GB":"el-GR",{style:"currency",currency:cur||"EUR"}).format(v);
+
+/* κλήσεις στον Worker (ίδιο domain με το site, /api/...) */
+const api=(path,body)=>fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+  .then(r=>r.json()).catch(()=>({ok:false,reason:"server_error"}));
+function reasonMsg(r){
+  switch(r.reason){
+    case "not_available": return t("x.not_available");
+    case "min_stay":      return t("x.min_stay")(r.minStay);
+    case "no_rate":       return t("x.no_rate");
+    case "too_long":      return t("x.too_long");
+    case "past_date":     return t("e.past");
+    case "invalid_dates": return t("e.min");
+    case "invalid_guests":return booking.r?t("e.cap")(R(booking.r).name,booking.r.cap):t("x.server");
+    case "invalid_name":  return t("e.name");
+    case "invalid_email": return t("e.email");
+    case "invalid_phone": return t("e.phone");
+    case "captcha_failed":return t("x.captcha_failed");
+    default:              return t("x.server");
+  }
+}
+/* κουμπί σε κατάσταση "φορτώνει" */
+function busy(btn,on,label){
+  if(on){btn.disabled=true;btn.dataset.busy="1";btn.textContent=label}
+  else{btn.disabled=false;delete btn.dataset.busy;btn.innerHTML=t(btn.dataset.i18n)}
+}
+
+/* Turnstile (captcha) */
+let tsId=null,tsToken="",tsTries=0;
+function captcha(){
+  tsToken="";
+  if(!window.turnstile){if(tsTries++<50)setTimeout(captcha,200);return}
+  if(tsId!==null){turnstile.reset(tsId);return}
+  tsId=turnstile.render("#captcha",{sitekey:TURNSTILE_SITEKEY,language:lang,
+    callback:v=>{tsToken=v},"expired-callback":()=>{tsToken=""},"error-callback":()=>{tsToken=""}});
+}
+
 function setStep(n){["st1","st2","st3"].forEach((id,i)=>{const el=$("#"+id);el.className="step"+(i+1===n?" on":i+1<n?" done":"")})}
 function renderAvail(){
-  const {ci,co,n,g,r}=booking;
-  $("#availBox").innerHTML=`<span class="eyebrow">${t("a.yes")}</span><b>${R(r).name}</b><span>${fmt(ci)} → ${fmt(co)} · ${n} ${t("a.nights")(n)} · ${g} ${t("a.guests")(g)}</span>`;
+  const {ci,co,n,g,r,total,cur}=booking;
+  $("#availBox").innerHTML=`<span class="eyebrow">${t("a.yes")}</span><b>${R(r).name}</b><span>${fmt(ci)} → ${fmt(co)} · ${n} ${t("a.nights")(n)} · ${g} ${t("a.guests")(g)}</span><span class="price">${t("a.total")}: <strong>${money(total,cur)}</strong></span>`;
 }
 function renderDone(){
   const b=booking;
-  $("#dSum").innerHTML=[[t("s.room"),R(b.r).name],[t("s.ci"),fmt(b.ci)+" · "+etaText()],[t("s.co"),fmt(b.co)],[t("s.nights"),b.n],[t("s.guests"),b.g],["Email",b.em],[t("s.phone"),b.ph]].map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+  $("#dSum").innerHTML=[[t("s.room"),R(b.r).name],[t("s.ci"),fmt(b.ci)+" · "+etaText()],[t("s.co"),fmt(b.co)],[t("s.nights"),b.n],[t("s.guests"),b.g],[t("s.total"),money(b.total,b.cur)],["Email",b.em],[t("s.phone"),b.ph]].map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
 }
-$("#f1").addEventListener("submit",e=>{
+
+/* Βήμα 1: έλεγχος διαθεσιμότητας + τιμή από το Hosthub */
+$("#f1").addEventListener("submit",async e=>{
   e.preventDefault();const ci=$("#ci").value,co=$("#co").value,g=+$("#guests").value,r=ROOMS.find(x=>x.id===$("#room").value);
   $("#e1").textContent="";
   if(!ci||!co) return $("#e1").textContent=t("e.dates");
@@ -518,20 +583,50 @@ $("#f1").addEventListener("submit",e=>{
   const n=Math.round((new Date(co)-new Date(ci))/864e5);
   if(n<1) return $("#e1").textContent=t("e.min");
   if(g>r.cap) return $("#e1").textContent=t("e.cap")(R(r).name,r.cap);
+
+  const btn=$("#f1 [type=submit]");
+  busy(btn,true,t("a.checking"));
+  const q=await api("/api/quote",{slug:r.id,checkIn:ci,checkOut:co});
+  busy(btn,false);
   booking={ci,co,n,g,r};
+  if(!q.ok) return $("#e1").textContent=reasonMsg(q);
+
+  Object.assign(booking,{n:q.nights,total:q.total,cur:q.currency});
   renderAvail();
   $("#f1").hidden=true;$("#avail").hidden=false;setStep(2);$("#fn").focus();
+  captcha();
 });
 $("#back").onclick=()=>{$("#avail").hidden=true;$("#f1").hidden=false;setStep(1)};
-$("#f2").addEventListener("submit",e=>{
+
+/* Βήμα 2: αποστολή κράτησης στο Hosthub */
+$("#f2").addEventListener("submit",async e=>{
   e.preventDefault();$("#e2").textContent="";
   const fn=$("#fn").value.trim(),ln=$("#ln").value.trim(),em=$("#em").value.trim(),ph=$("#ph").value.trim();
   if(!fn||!ln) return $("#e2").textContent=t("e.name");
   if(!/^\S+@\S+\.\S+$/.test(em)) return $("#e2").textContent=t("e.email");
   if(ph.replace(/\D/g,"").length<10) return $("#e2").textContent=t("e.phone");
   if(!$("#ok").checked) return $("#e2").textContent=t("e.ok");
-  const ref="GD-"+Date.now().toString(36).toUpperCase().slice(-6);
-  Object.assign(booking,{em,ph,lang});
+  if(!tsToken) return $("#e2").textContent=t("x.captcha");
+
+  const btn=$("#f2 [type=submit]");
+  busy(btn,true,t("f.sending"));
+  const res=await api("/api/book",{
+    slug:booking.r.id,checkIn:booking.ci,checkOut:booking.co,adults:booking.g,lang,
+    guest:{name:`${fn} ${ln}`,email:em,phone:ph},
+    country:$("#ctry").value.trim(),eta:etaText(),notes:$("#notes").value.trim(),
+    turnstileToken:tsToken
+  });
+  busy(btn,false);
+
+  if(!res.ok){
+    if(["not_available","min_stay","no_rate"].includes(res.reason)){   /* κλείστηκε στο μεταξύ */
+      $("#avail").hidden=true;$("#f1").hidden=false;setStep(1);$("#e1").textContent=t("x.taken");return;
+    }
+    $("#e2").textContent=reasonMsg(res);captcha();return;   /* κάθε token ισχύει μία φορά */
+  }
+
+  Object.assign(booking,{em,ph,lang,total:res.total,cur:res.currency});
+  const ref="GD-"+String(res.bookingId||Date.now().toString(36)).slice(-6).toUpperCase();
   $("#dName").textContent=fn;$("#dRef").textContent=ref;
   renderDone();
   $("#avail").hidden=true;$("#done").hidden=false;setStep(3);

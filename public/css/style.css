@@ -279,4 +279,11 @@ body.lb-open{overflow:hidden}
 .room .desc{color:var(--muted);font-size:.95rem}
 .err.ok{color:var(--leaf)}
 
+/* booking: price, loading, captcha */
+.result .price{margin-top:4px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--sage) 45%,transparent);font-size:.95rem}
+.result .price strong{font-family:var(--display);font-weight:400;font-size:1.35rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.btn[disabled]{opacity:.65;cursor:progress}
+.captcha{min-height:65px}
+.captcha:empty{min-height:0}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

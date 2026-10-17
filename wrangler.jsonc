@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "giardino",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+
+  // Τα αρχεία του site (index.html, css/, img/) είναι στο public/.
+  // Ό,τι είναι εκεί δημοσιεύεται — ΜΗΝ βάλετε κώδικα του backend ή κλειδιά μέσα.
+  // Τα /api/* πάνε στον Worker.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Συγχρονισμός με Hosthub κάθε 10 λεπτά
+  "triggers": { "crons": ["*/10 * * * *"] },
+
+  "kv_namespaces": [
+    { "binding": "CACHE", "id": "ΒΑΛΤΕ_ΕΔΩ_ΤΟ_ID_ΤΟΥ_KV" }
+  ],
+
+  "vars": {
+    // Emails (προαιρετικά — χρειάζονται λογαριασμό στο resend.com και το secret RESEND_API_KEY)
+    "MAIL_FROM": "Giardino <bookings@giardino-drama.gr>",
+    "NOTIFY_EMAIL": "ΤΟ_EMAIL_ΣΑΣ",
+
+    // Τα δύο διαμερίσματα. Το slug είναι το id του δωματίου στο index.html (s1, s2).
+    "ROOMS": [
+      { "slug": "s1", "name": "One-Bedroom Apartment", "rentalId": "zqmagyqn1s", "ratePlanId": "79o80XydoK", "maxGuests": 2 },
+      { "slug": "s2", "name": "Two-Bedroom Apartment", "rentalId": "2vaf3cmy2b", "ratePlanId": "Q3o99qX9o0", "maxGuests": 4 }
+    ]
+  },
+
+  "observability": { "enabled": true }
+}
