@@ -24,7 +24,17 @@ interface Env {
   NOTIFY_EMAIL?: string;         // email ιδιοκτήτη
 }
 
-type Day = { price: number | null; minStay: number; blocked: boolean };
+type Day = {
+  price: number | null;      // τιμή νύχτας σε € (null = δεν έχει οριστεί)
+  minStay: number;           // ελάχιστες νύχτες όταν η άφιξη είναι αυτή τη μέρα
+  maxStay: number;           // μέγιστες νύχτες όταν η άφιξη είναι αυτή τη μέρα
+  blocked: boolean;          // κλειστή (κράτηση, block ή μη διαθέσιμη στο Hosthub)
+  noArrival?: boolean;       // δεν επιτρέπεται άφιξη αυτή τη μέρα
+  noDeparture?: boolean;     // δεν επιτρέπεται αναχώρηση αυτή τη μέρα
+  extraPP?: number;          // επιπλέον € ανά άτομο / νύχτα πάνω από το όριο
+  ppThreshold?: number;      // άτομα που περιλαμβάνονται στην τιμή
+};
+const emptyDay = (): Day => ({ price: null, minStay: 1, maxStay: 365, blocked: false });
 type Snapshot = { updatedAt: string; currency: string; rooms: Record<string, Record<string, Day>> };
 
 const BASE = "https://app.hosthub.com/api/2019-03-01";
@@ -40,11 +50,20 @@ const F = {
   nextPage:    (p: any): string | null => p.navigation?.next ?? null,
   evFrom:      (e: any): string => String(e.date_from).slice(0, 10),
   evTo:        (e: any): string => String(e.date_to).slice(0, 10),
-  evCancelled: (e: any): boolean => Boolean(e.is_cancelled) || e.status === "cancelled",
-  rateDate:    (r: any): string => String(r.date).slice(0, 10),
-  ratePrice:   (r: any): number => Number(r.price ?? r.rate),
-  rateMinStay: (r: any): number => Number(r.min_stay ?? 1),
-  rateCurr:    (r: any): string => r.currency ?? "EUR",
+  // CalendarEvent — επιβεβαιωμένο με πραγματική απάντηση. Κάθε μη ακυρωμένο event
+  // (Booking, block κ.λπ.) κλείνει τις ημέρες date_from … date_to (η date_to είναι η αναχώρηση).
+  evCancelled: (e: any): boolean => e.cancelled_at != null,
+  // RentalDailyRate — επιβεβαιωμένο με πραγματική απάντηση του Hosthub (τιμές σε λεπτά)
+  rateDate:     (r: any): string => String(r.date).slice(0, 10),
+  ratePrice:    (r: any): number => Number(r.amount?.cents) / 100,
+  rateCurr:     (r: any): string => r.amount?.currency ?? "EUR",
+  rateMinStay:  (r: any): number => Number(r.minimum_length_of_stay ?? 1) || 1,
+  rateMaxStay:  (r: any): number => Number(r.maximum_length_of_stay ?? 365) || 365,
+  rateOpen:     (r: any): boolean => r.is_available !== false,
+  rateNoArrive: (r: any): boolean => r.block_arrival === true,
+  rateNoDepart: (r: any): boolean => r.block_departure === true,
+  rateExtraPP:  (r: any): number => Number(r.extra_cost_per_person?.cents ?? 0) / 100,
+  ratePPLimit:  (r: any): number => Number(r.amount_of_people_threshold ?? 0),
   newBooking: (room: Room, b: BookingInput, total: number, currency: string) => ({
     type: "Booking",
     date_from: b.checkIn,
@@ -81,8 +100,10 @@ async function hhList(env: Env, path: string) {
   let next: string | null = path;
   for (let i = 0; next && i < 20; i++) {          // όριο σελίδων για ασφάλεια
     const page = await hh(env, next);
-    out.push(...F.listData(page));
-    next = F.nextPage(page);
+    const items = F.listData(page);
+    out.push(...items);
+    // Το Hosthub δίνει πάντα "next", ακόμα και στην τελευταία σελίδα → σταματάμε στην πρώτη άδεια
+    next = items.length ? F.nextPage(page) : null;
   }
   return out;
 }
@@ -114,13 +135,23 @@ async function buildRoom(env: Env, room: Room) {
   for (const r of rates) {
     const d = F.rateDate(r);
     if (d < start || d >= end) continue;
-    days[d] = { price: F.ratePrice(r), minStay: F.rateMinStay(r), blocked: false };
+    const price = F.ratePrice(r);
+    days[d] = {
+      price: Number.isFinite(price) && price > 0 ? price : null,
+      minStay: F.rateMinStay(r),
+      maxStay: F.rateMaxStay(r),
+      blocked: !F.rateOpen(r),
+      noArrival: F.rateNoArrive(r) || undefined,
+      noDeparture: F.rateNoDepart(r) || undefined,
+      extraPP: F.rateExtraPP(r) || undefined,
+      ppThreshold: F.ratePPLimit(r) || undefined,
+    };
     currency = F.rateCurr(r);
   }
   for (const e of events) {
     if (F.evCancelled(e)) continue;
     for (const d of nights(maxStr(F.evFrom(e), start), minStr(F.evTo(e), end))) {
-      (days[d] ??= { price: null, minStay: 1, blocked: false }).blocked = true;
+      (days[d] ??= emptyDay()).blocked = true;
     }
   }
   return { days, currency };
@@ -144,7 +175,7 @@ async function getSnapshot(env: Env): Promise<Snapshot> {
 // ---------- υπολογισμός τιμής ----------
 type QuoteResult =
   | { ok: true; nights: number; total: number; currency: string; perNight: { date: string; price: number }[] }
-  | { ok: false; reason: string; minStay?: number };
+  | { ok: false; reason: string; minStay?: number; maxStay?: number };
 
 function validateDates(checkIn: string, checkOut: string): string | null {
   if (!DATE_RE.test(checkIn) || !DATE_RE.test(checkOut)) return "invalid_dates";
@@ -159,7 +190,7 @@ async function liveAvailable(env: Env, room: Room, checkIn: string, checkOut: st
   return !events.some((e) => !F.evCancelled(e) && F.evFrom(e) < checkOut && F.evTo(e) > checkIn);
 }
 
-async function quote(env: Env, room: Room, checkIn: string, checkOut: string): Promise<QuoteResult> {
+async function quote(env: Env, room: Room, checkIn: string, checkOut: string, adults = 1): Promise<QuoteResult> {
   const bad = validateDates(checkIn, checkOut);
   if (bad) return { ok: false, reason: bad };
 
@@ -167,11 +198,22 @@ async function quote(env: Env, room: Room, checkIn: string, checkOut: string): P
   const days = snap.rooms[room.slug] ?? {};
   const list = nights(checkIn, checkOut);
 
-  const perNight = list.map((d) => ({ date: d, price: days[d]?.price ?? null }));
+  if (list.some((d) => days[d]?.blocked)) return { ok: false, reason: "not_available" };
+
+  // τιμή νύχτας + τυχόν επιπλέον χρέωση ανά άτομο (αν έχει οριστεί στο Hosthub)
+  const perNight = list.map((d) => {
+    const day = days[d];
+    if (!day || day.price == null) return { date: d, price: null as number | null };
+    const extra = day.extraPP && day.ppThreshold ? Math.max(0, adults - day.ppThreshold) * day.extraPP : 0;
+    return { date: d, price: day.price + extra };
+  });
   if (perNight.some((n) => n.price == null)) return { ok: false, reason: "no_rate" };
 
-  const minStay = days[checkIn]?.minStay ?? 1;
-  if (list.length < minStay) return { ok: false, reason: "min_stay", minStay };
+  const first = days[checkIn]!;
+  if (list.length < first.minStay) return { ok: false, reason: "min_stay", minStay: first.minStay };
+  if (list.length > first.maxStay) return { ok: false, reason: "max_stay", maxStay: first.maxStay };
+  if (first.noArrival) return { ok: false, reason: "no_arrival" };
+  if (days[checkOut]?.noDeparture) return { ok: false, reason: "no_departure" };
 
   // η cache μπορεί να είναι έως 10' παλιά → ζωντανός έλεγχος πριν δώσουμε τελική τιμή
   if (!(await liveAvailable(env, room, checkIn, checkOut))) return { ok: false, reason: "not_available" };
@@ -225,7 +267,7 @@ async function book(env: Env, ctx: ExecutionContext, req: Request, b: BookingInp
     return json({ ok: false, reason: "captcha_failed" }, 403);
 
   // τιμή υπολογίζεται ΜΟΝΟ στον server
-  const q = await quote(env, room, b.checkIn, b.checkOut);
+  const q = await quote(env, room, b.checkIn, b.checkOut, b.adults);
   if (!q.ok) return json(q, 409);
 
   const created = await hh(env, `/rentals/${room.rentalId}/calendar-events`, {
@@ -243,7 +285,7 @@ async function book(env: Env, ctx: ExecutionContext, req: Request, b: BookingInp
 async function markBlocked(env: Env, slug: string, from: string, to: string) {
   const snap = await getSnapshot(env);
   const days = (snap.rooms[slug] ??= {});
-  for (const d of nights(from, to)) (days[d] ??= { price: null, minStay: 1, blocked: false }).blocked = true;
+  for (const d of nights(from, to)) (days[d] ??= emptyDay()).blocked = true;
   await env.CACHE.put(SNAPSHOT_KEY, JSON.stringify(snap));
 }
 
@@ -294,6 +336,7 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
       date: d,
       price: days[d]?.price ?? null,
       minStay: days[d]?.minStay ?? 1,
+      noArrival: !!days[d]?.noArrival,
       available: d >= today() && !!days[d] && !days[d].blocked && days[d].price != null,
     }));
     return json({ currency: snap.currency, updatedAt: snap.updatedAt, days: out }, 200,
@@ -304,7 +347,8 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
     const b: any = await req.json().catch(() => ({}));
     const room = findRoom(env, b.slug);
     if (!room) return json({ ok: false, reason: "unknown_room" }, 400);
-    return json(await quote(env, room, b.checkIn, b.checkOut));
+    const adults = Number.isInteger(b.adults) ? Math.min(Math.max(b.adults, 1), room.maxGuests) : 1;
+    return json(await quote(env, room, b.checkIn, b.checkOut, adults));
   }
 
   if (p === "/api/book" && req.method === "POST") {

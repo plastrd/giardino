@@ -302,6 +302,9 @@ el:{
   "x.min_stay":n=>`Για αυτή την ημερομηνία άφιξης η ελάχιστη διαμονή είναι ${n} νύχτες.`,
   "x.no_rate":"Δεν έχουν ανοίξει ακόμα κρατήσεις για αυτές τις ημερομηνίες. Καλέστε μας να σας εξυπηρετήσουμε.",
   "x.too_long":"Για διαμονή πάνω από 30 νύχτες καλέστε μας.",
+  "x.max_stay":n=>`Για αυτή την ημερομηνία άφιξης η μέγιστη διαμονή είναι ${n} νύχτες.`,
+  "x.no_arrival":"Δεν γίνονται αφίξεις αυτή την ημέρα. Επιλέξτε άλλη ημερομηνία άφιξης.",
+  "x.no_departure":"Δεν γίνονται αναχωρήσεις αυτή την ημέρα. Επιλέξτε άλλη ημερομηνία αναχώρησης.",
   "x.captcha":"Ολοκληρώστε την επαλήθευση πριν την αποστολή.",
   "x.captcha_failed":"Η επαλήθευση απέτυχε. Δοκιμάστε ξανά.",
   "x.taken":"Οι ημερομηνίες μόλις κλείστηκαν από άλλον επισκέπτη. Επιλέξτε άλλες ημερομηνίες.",
@@ -367,6 +370,9 @@ en:{
   "x.min_stay":n=>`For this check-in date the minimum stay is ${n} nights.`,
   "x.no_rate":"Bookings for these dates aren't open yet. Please call us and we'll help.",
   "x.too_long":"For stays longer than 30 nights, please call us.",
+  "x.max_stay":n=>`For this check-in date the maximum stay is ${n} nights.`,
+  "x.no_arrival":"Check-in isn't possible on this day. Please choose another check-in date.",
+  "x.no_departure":"Check-out isn't possible on this day. Please choose another check-out date.",
   "x.captcha":"Please complete the verification before sending.",
   "x.captcha_failed":"Verification failed. Please try again.",
   "x.taken":"These dates were just booked by another guest. Please choose other dates.",
@@ -538,6 +544,9 @@ function reasonMsg(r){
     case "min_stay":      return t("x.min_stay")(r.minStay);
     case "no_rate":       return t("x.no_rate");
     case "too_long":      return t("x.too_long");
+    case "max_stay":      return t("x.max_stay")(r.maxStay);
+    case "no_arrival":    return t("x.no_arrival");
+    case "no_departure":  return t("x.no_departure");
     case "past_date":     return t("e.past");
     case "invalid_dates": return t("e.min");
     case "invalid_guests":return booking.r?t("e.cap")(R(booking.r).name,booking.r.cap):t("x.server");
@@ -586,7 +595,7 @@ $("#f1").addEventListener("submit",async e=>{
 
   const btn=$("#f1 [type=submit]");
   busy(btn,true,t("a.checking"));
-  const q=await api("/api/quote",{slug:r.id,checkIn:ci,checkOut:co});
+  const q=await api("/api/quote",{slug:r.id,checkIn:ci,checkOut:co,adults:g});
   busy(btn,false);
   booking={ci,co,n,g,r};
   if(!q.ok) return $("#e1").textContent=reasonMsg(q);
@@ -619,7 +628,7 @@ $("#f2").addEventListener("submit",async e=>{
   busy(btn,false);
 
   if(!res.ok){
-    if(["not_available","min_stay","no_rate"].includes(res.reason)){   /* κλείστηκε στο μεταξύ */
+    if(["not_available","min_stay","max_stay","no_rate","no_arrival","no_departure"].includes(res.reason)){   /* κλείστηκε στο μεταξύ */
       $("#avail").hidden=true;$("#f1").hidden=false;setStep(1);$("#e1").textContent=t("x.taken");return;
     }
     $("#e2").textContent=reasonMsg(res);captcha();return;   /* κάθε token ισχύει μία φορά */
