@@ -160,25 +160,34 @@
 <!-- BAR -->
 <div class="view" id="v-bar" hidden>
   <section><div class="wrap">
-    <div class="bar-hero">
-      <div><p class="eyebrow" data-i18n="bar.eyebrow"></p></div>
-      <div class="hours">
-        <span data-i18n="bar.h1"></span><span data-i18n="bar.h1v"></span>
-        <span>Wine bar</span><span data-i18n="bar.h2v"></span>
-        <span data-i18n="bar.h3"></span><span data-i18n="bar.h3v"></span>
+    <div class="daynight">
+      <h2 class="dn-title" data-i18n="dn.title"></h2>
+      <div class="dn-clock">
+        <div class="dn-track" aria-hidden="true"><svg class="dn-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><span class="dn-dot" id="dnDot"></span><span class="dn-moon"></span></div>
+        <p class="dn-now" id="dnNow" aria-live="polite"></p>
+      </div>
+      <div class="dn-half dn-day">
+        <p class="dn-when"><svg class="dn-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 20h22v9a9 9 0 0 1-9 9h-4a9 9 0 0 1-9-9z"/><path d="M32 23h3a4 4 0 0 1 0 8h-3.5"/><path d="M17 8c-2 3 2 5 0 8M24 6c-2 3 2 5 0 8"/></svg><span data-i18n="dn.dayWhen"></span></p>
+        <h3 data-i18n="dn.dayH"></h3>
+        <p data-i18n="dn.dayP"></p>
+      </div>
+      <div class="dn-half dn-night">
+        <p class="dn-when"><svg class="dn-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M15 6h18l-1 10a8 8 0 0 1-16 0z"/><path d="M24 24v14M17 41h14"/><path d="M16.5 13h15"/></svg><span data-i18n="dn.nightWhen"></span></p>
+        <h3 data-i18n="dn.nightH"></h3>
+        <p data-i18n="dn.nightP"></p>
       </div>
     </div>
     <div class="gallery" id="barGallery" data-i18n-attr="aria-label:bar.galleryAria"></div>
     <div class="events">
       <div class="event"><p class="eyebrow" data-i18n="ev.1e"></p><h3 data-i18n="ev.1h"></h3><p data-i18n="ev.1p"></p></div>
-      <div class="event"><p class="eyebrow">Live events</p><h3 data-i18n="ev.2h"></h3><p data-i18n="ev.2p"></p></div>
-      <div class="event"><p class="eyebrow">Private events</p><h3 data-i18n="ev.3h"></h3><p data-i18n="ev.3p"></p></div>
+      <div class="event"><p class="eyebrow" data-i18n="ev.2e"></p><h3 data-i18n="ev.2h"></h3><p data-i18n="ev.2p"></p></div>
+      <div class="event"><p class="eyebrow"  data-i18n="ev.3e"></p><h3 data-i18n="ev.3h"></h3><p data-i18n="ev.3p"></p></div>
     </div>
     <div class="panel enquiry">
       <div class="sec-head"><p class="eyebrow" data-i18n="enq.eyebrow"></p><h3 data-i18n="enq.h3"></h3></div>
       <form id="fe" novalidate>
         <div class="grid2">
-          <div class="field"><label for="evType" data-i18n="enq.type"></label><select id="evType"><option data-i18n="enq.o1"></option><option>Private event</option><option data-i18n="enq.o3"></option><option data-i18n="enq.o4"></option></select></div>
+          <div class="field"><label for="evType" data-i18n="enq.type"></label><select id="evType"><option data-i18n="enq.o1"></option><option data-i18n="enq.o2"></option><option data-i18n="enq.o3"></option><option data-i18n="enq.o4"></option></select></div>
           <div class="field"><label for="evDate" data-i18n="enq.date"></label><input type="date" id="evDate"></div>
           <div class="field"><label for="evPeople" data-i18n="enq.people"></label><input type="number" id="evPeople" min="1" value="40"></div>
           <div class="field"><label for="evContact" data-i18n="enq.contact"></label><input id="evContact" required></div>
@@ -253,12 +262,12 @@ el:{
   "meta.desc":"Giardino Espresso Wine Bar & High Living Suites, Ευξείνου Πόντου 22, Δράμα. Διαμερίσματα, coffee & wine bar, δεξιώσεις και εκδηλώσεις.",
   "brand.aria":"Giardino, αρχική","lang.aria":"Γλώσσα",
   "nav.menu":"Μενού","nav.aria":"Κύριο μενού",
-  "nav.home":"Αρχική","nav.rooms":"Δωμάτια","nav.avail":"Διαθεσιμότητα","nav.bar":"Καφέ &amp; Bar","nav.tour":"Τουρισμός στη Δράμα",
+  "nav.home":"Αρχική","nav.rooms":"Δωμάτια","nav.avail":"Διαθεσιμότητα","nav.bar":"Καφέ &amp; Μπαρ","nav.tour":"Τουρισμός στη Δράμα",
   "hero.eyebrow":"Δράμα · Ευξείνου Πόντου 22","hero.cta1":"Έλεγχος διαθεσιμότητας","hero.cta2":"Δείτε τα δωμάτια",
   "home.eyebrow":"Στο Giardino",
   "ig.h2":"Ακολουθήστε μας","ig.btn":"Ακολουθήστε μας στο Instagram ↗","ig.post":"Ανάρτηση στο Instagram",
   "tile.1h":"Δωμάτια","tile.1p":"Δωμάτια με ησυχία, άνεση και όλα όσα χρειάζεστε για σύντομη ή μεγαλύτερη διαμονή.","tile.1go":"Τα δωμάτια →",
-  "tile.2h":"Καφέ &amp; Bar","tile.2p":"Ο κάτω χώρος φιλοξενεί δεξιώσεις, live βραδιές και ιδιωτικές εκδηλώσεις.","tile.2go":"Το bar →",
+  "tile.2h":"Καφέ &amp; Μπαρ","tile.2p":"Ο κάτω χώρος φιλοξενεί δεξιώσεις, ζωνατανές βραδιές και ιδιωτικές εκδηλώσεις.","tile.2go":"Το bar →",
   "tile.3h":"Τουρισμός στη Δράμα","tile.3p":"Ιδέες για να γνωρίσετε την πόλη και τη γύρω περιοχή κατά τη διαμονή σας.","tile.3go":"Εξερευνήστε →",
   "rooms.eyebrow":"Δωμάτια","rooms.h2":"Δύο δωμάτια, το καθένα με τον δικό του χαρακτήρα","rooms.lede":"Κάθε δωμάτιο είναι σχεδιασμένο για να νιώθετε σαν στο σπίτι σας, με την άνεση ενός ξενοδοχείου.",
   "amen.1b":"Wi-Fi","amen.1s":"Δωρεάν, υψηλής ταχύτητας",
@@ -273,23 +282,27 @@ el:{
   "f.ok":"Συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου μόνο για την επεξεργασία της κράτησης.",
   "f.send":"Αποστολή κράτησης","f.back":"Αλλαγή ημερομηνιών",
   "done.eyebrow":"Η αίτηση καταχωρήθηκε","done.thanks":"Ευχαριστούμε,","done.note":"Θα λάβετε επιβεβαίωση στο email σας. Κωδικός αίτησης:","done.again":"Νέα κράτηση",
-  "bar.eyebrow":"Καφέ &amp; Bar · ισόγειο","bar.h1":"Καφές","bar.h1v":"πρωί – απόγευμα","bar.h2v":"απόγευμα – βράδυ","bar.h3":"Εκδηλώσεις","bar.h3v":"κατόπιν συνεννόησης",
-  "bar.galleryAria":"Φωτογραφίες από το καφέ και το bar","lb.bar":"Καφέ & Bar",
-  "ev.1e":"Δεξιώσεις","ev.1h":"Βαφτίσεις, επέτειοι, γιορτές","ev.1p":"Οργανώνουμε τη δεξίωσή σας στον χώρο του bar, με καφέ, κρασί και μενού προσαρμοσμένο σε εσάς.",
-  "ev.2h":"Μουσικές βραδιές","ev.2p":"Ακουστικά live, DJ sets και βραδιές γευσιγνωσίας κρασιού. Το πρόγραμμα ανακοινώνεται στο Facebook και στο Instagram.",
-  "ev.3h":"Ο χώρος μόνο για εσάς","ev.3p":"Γενέθλια, εταιρικές συναντήσεις, παρουσιάσεις. Κλείστε ολόκληρο τον χώρο για τη δική σας εκδήλωση.",
-  "enq.eyebrow":"Ζητήστε προσφορά","enq.h3":"Σχεδιάζετε εκδήλωση;","enq.type":"Είδος εκδήλωσης","enq.o1":"Δεξίωση","enq.o3":"Live / μουσική βραδιά","enq.o4":"Εταιρική εκδήλωση",
+  "dn.title":"Από τον πρώτο καφέ<br>ως το τελευταίο ποτήρι κρασί",
+  "dn.nowDay":"Τώρα · ώρα για καφέ","dn.nowNight":"Τώρα · ώρα για ένα ποτήρι κρασί","dn.closed":"Ανοίγουμε στις 09:00",
+  "dn.dayWhen":"Το πρωί","dn.dayH":"Ο καφές σας, με την ησυχία του",
+  "dn.dayP":"Από τον πρώτο καφέ της ημέρας μέχρι ένα απολαυστικό brunch, σας περιμένουμε με εκλεκτό καφέ, νόστιμες γεύσεις και χαλαρή διάθεση. Για ένα ήρεμο ξεκίνημα, μια συνάντηση ή απλώς για λίγη ώρα για χαλάρωσης.",
+  "dn.nightWhen":"Το βράδυ","dn.nightH":"Ένα ποτήρι από τον τόπο μας",
+  "dn.nightP":"Κρασιά από τοπικά οινοποιεία, αγαπημένα ποτά και δροσερά cocktails συναντούν γεύσεις που αξίζει να μοιραστείτε. Καθώς η μέρα δίνει τη θέση της στη νύχτα, η μουσική συνεχίζεται και η παρέα μένει λίγο ακόμα.",
+  "bar.galleryAria":"Φωτογραφίες από το καφέ και το bar","lb.bar":"Καφέ & Μπαρ",
+  "ev.1e":"ΠΡΟΣΩΠΙΚΕΣ ΕΚΔΗΛΩΣΕΙΣ","ev.1h":"Γενέθλια, επέτειοι, γιορτές","ev.1p":"Κάθε ξεχωριστή στιγμή αξίζει να γιορτάζεται! Από γενέθλια και επετείους μέχρι προσωπικές γιορτές και σημαντικά ορόσημα, δημιουργούμε το ιδανικό σκηνικό για όμορφες στιγμές με τους αγαπημένους σας.",
+  "ev.2e":"ΖΩΝΤΑΝΕΣ ΒΡΑΔΙΕΣ","ev.2h":"Μουσικές βραδιές","ev.2p":"Live, DJ sets και βραδιές γευσιγνωσίας κρασιού. Το πρόγραμμα ανακοινώνεται στο Facebook και στο Instagram.",
+  "ev.3e":"ΙΔΙΩΤΙΚΕΣ ΕΚΔΗΛΩΣΕΙΣ","ev.3h":"Ο χώρος μόνο για εσάς","ev.3p":"Από γενέθλια και ιδιωτικές γιορτές μέχρι επαγγελματικές συναντήσεις και παρουσιάσεις, ο χώρος μας είναι διαθέσιμος για τις δικές σας ξεχωριστές περιστάσεις. Κλείστε ολόκληρο των χώρο αποκλειστικά για τη δική σας εκδήλωση.",
+  "enq.eyebrow":"Ζητήστε προσφορά","enq.h3":"Σχεδιάζετε εκδήλωση;","enq.type":"Είδος εκδήλωσης","enq.o1":"Δεξίωση","enq.o2":"Ιδιωτική εκδήλωση","enq.o3":"Live / μουσική βραδιά","enq.o4":"Εταιρική εκδήλωση",
   "enq.date":"Ημερομηνία","enq.people":"Άτομα (περίπου)","enq.contact":"Email ή τηλέφωνο","enq.send":"Αποστολή αιτήματος",
   "tour.eyebrow":"Τουρισμός στη Δράμα","tour.h2":"Ανακαλύψτε τη Δράμα","tour.soon":"Σύντομα εδώ οι προτάσεις μας για να γνωρίσετε τη Δράμα και τη γύρω περιοχή.",
   "faq.h2":"Συχνές ερωτήσεις","faq.lede":"Δεν βρήκατε την απάντηση; Καλέστε μας ή στείλτε μήνυμα στα social media μας.",
-  "faq.q1":"Τι ώρα είναι το check-in και το check-out;","faq.a1":"Check-in από τις 14:00 και check-out έως τις 11:00. Αν χρειάζεστε νωρίτερη άφιξη ή αργότερη αναχώρηση, ενημερώστε μας και θα το κανονίσουμε ανάλογα με τη διαθεσιμότητα.",
+  "faq.q1":"Τι ώρα είναι το check-in και το check-out;","faq.a1":"Check-in από τις 14:00 και check-out έως τις 11:00.",
   "faq.q2":"Υπάρχει χώρος στάθμευσης;","faq.a2":"Υπάρχει δυνατότητα στάθμευσης στους γύρω δρόμους.",
-  "faq.q3":"Περιλαμβάνεται πρωινό;","faq.a3":"Το πρωινό και ο καφές σερβίρονται στο coffee &amp; wine bar του ισογείου. Ρωτήστε μας για πακέτα διαμονής με πρωινό.",
+  "faq.q3":"Περιλαμβάνεται πρωινό;","faq.a3":"Το πρωινό και ο καφές σερβίρονται στο χώρο του ισογείου. Ρωτήστε μας για πακέτα διαμονής με πρωινό.",
   "faq.q4":"Είναι καλύτερα να κλείσω εδώ ή μέσω Booking και Airbnb;","faq.a4":"Μπορείτε να κλείσετε όπου σας βολεύει. Με απευθείας κράτηση μιλάτε κατευθείαν μαζί μας για ειδικά αιτήματα.",
   "faq.q5":"Μπορώ να ακυρώσω την κράτησή μου;","faq.a5":"Η πολιτική ακύρωσης αναφέρεται στην επιβεβαίωση της κράτησης. Για κρατήσεις μέσω Booking ή Airbnb ισχύει η πολιτική της κάθε πλατφόρμας.",
-  "faq.q6":"Μπορούμε να κάνουμε δεξίωση ή ιδιωτική εκδήλωση στο bar;","faq.a6":"Ναι. Ο κάτω χώρος φιλοξενεί δεξιώσεις, live και private events. Συμπληρώστε τη φόρμα στη σελίδα Καφέ &amp; Bar ή καλέστε μας.",
+  "faq.q6":"Μπορούμε να κάνουμε δεξίωση ή ιδιωτική εκδήλωση στο μπαρ;","faq.a6":"Ναι. Ο κάτω χώρος φιλοξενεί δεξιώσεις, ζωντανές μουσικές βραδιές και ιδιωτικές εκδηλώσεις. Συμπληρώστε τη φόρμα που θα βρείτε στη σελίδα Καφέ &amp; Μπαρ ή καλέστε μας.",
   "faq.q7":"Επιτρέπονται κατοικίδια;","faq.a7":"Επικοινωνήστε μαζί μας πριν την κράτηση για να σας ενημερώσουμε για το συγκεκριμένο δωμάτιο.",
-  "ft.addr":"Διεύθυνση","ft.addrText":"Ευξείνου Πόντου 22<br>Δράμα, Ελλάδα","ft.map":"Οδηγίες στον χάρτη ↗","ft.contact":"Επικοινωνία","ft.copy":"Αντιγραφή","ft.copied":"Αντιγράφηκε",
   "ft.city":"Δράμα","ft.partners":'Συνεργαζόμαστε με <a href="https://www.booking.com/searchresults.html?city=-816779&highlighted_hotels=8047564" target="_blank" rel="noopener">Booking.com ↗</a> · <a href="https://www.airbnb.com/rooms/53923210" target="_blank" rel="noopener">Airbnb ↗</a>',
   /* dynamic texts */
   "r.upTo":c=>`Έως ${c} άτομα`,"r.book":"Κράτηση →","r.opt":c=>`έως ${c}`,"r.photo":"Φωτογραφία δωματίου","lb.close":"Κλείσιμο","lb.prev":"Προηγούμενη φωτογραφία","lb.next":"Επόμενη φωτογραφία","lb.open":(n,i)=>`Προβολή φωτογραφίας ${i} από ${n}`,
@@ -341,12 +354,17 @@ en:{
   "f.ok":"I agree that my details will be used only to process this booking.",
   "f.send":"Send booking request","f.back":"Change dates",
   "done.eyebrow":"Request received","done.thanks":"Thank you,","done.note":"You'll receive a confirmation by email. Request code:","done.again":"New booking",
-  "bar.eyebrow":"Coffee &amp; Bar · ground floor","bar.h1":"Coffee","bar.h1v":"morning – afternoon","bar.h2v":"afternoon – evening","bar.h3":"Events","bar.h3v":"by arrangement",
+  "dn.title":"From the first espresso<br>to the last glass of wine",
+  "dn.nowDay":"Right now · coffee time","dn.nowNight":"Right now · time for a glass of wine","dn.closed":"We open at 09:00",
+  "dn.dayWhen":"Mornings","dn.dayH":"Your coffee, taken slowly",
+  "dn.dayP":"From your morning coffee to a relaxing brunch, join us for the aroma of freshly brewed coffee, delicious food and a laid-back atmosphere. Whether you're meeting friends, catching up or simply enjoying a slow morning, there's always time for one more cup.",
+  "dn.nightWhen":"Evenings","dn.nightH":"A glass from right here",
+  "dn.nightP":"Wines from local wineries, your favourite drinks and refreshing cocktails come together with food worth sharing. As day turns to night, the music plays on and good company gives you another reason to stay a little longer.",
   "bar.galleryAria":"Photos of the café and bar","lb.bar":"Coffee & Bar",
-  "ev.1e":"Receptions","ev.1h":"Christenings, anniversaries, celebrations","ev.1p":"We host your reception in the bar, with coffee, wine and a menu tailored to you.",
-  "ev.2h":"Music nights","ev.2p":"Acoustic live sets, DJ nights and wine tastings. The programme is announced on Facebook and Instagram.",
-  "ev.3h":"The space, just for you","ev.3p":"Birthdays, business meetings, presentations. Book the whole space for your own event.",
-  "enq.eyebrow":"Request a quote","enq.h3":"Planning an event?","enq.type":"Type of event","enq.o1":"Reception","enq.o3":"Live / music night","enq.o4":"Corporate event",
+  "ev.1e":"PERSONAL EVENTS","ev.1h":"Birthdays, anniversaries, celebrations","ev.1p":"From intimate birthday gatherings and wedding anniversaries to life’s special milestones, we create the perfect setting for moments worth celebrating.",
+  "ev.2e":"LIVE EVENTS","ev.2h":"Music nights","ev.2p":"Acoustic live sets, DJ nights and wine tastings. The programme is announced on Facebook and Instagram.",
+  "ev.3e":"PRIVATE EVENTS","ev.3h":"The space, just for you","ev.3p":"Birthdays, business meetings and private celebrations. Reserve the entire space for your event and let us help you create a memorable experience tailored to your needs",
+  "enq.eyebrow":"Request a quote","enq.h3":"Planning an event?","enq.type":"Type of event","enq.o1":"Reception","enq.o2":"Private event","enq.o3":"Live / music night","enq.o4":"Corporate event",
   "enq.date":"Date","enq.people":"Guests (approx.)","enq.contact":"Email or phone","enq.send":"Send request",
   "tour.eyebrow":"Tourism in Drama","tour.h2":"Discover Drama","tour.soon":"Coming soon: our suggestions for getting to know Drama and the surrounding area.",
   "faq.h2":"Frequently asked questions","faq.lede":"Didn't find your answer? Call us or send us a message on social media.",
@@ -440,7 +458,7 @@ function setLang(l){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
   /* country field: swap only if it still holds the default value */
   const c=$("#ctry"); if(!c.value||c.value===STR[prev]["f.ctryDefault"]) c.value=t("f.ctryDefault");
-  renderRooms(); renderBar();
+  renderRooms(); renderBar(); dnTick();
   if(!$("#avail").hidden) renderAvail();
   if(!$("#done").hidden) renderDone();
   ["#e1","#e2","#eE"].forEach(s=>$(s).textContent="");
@@ -678,6 +696,22 @@ function loadIG(){
     }).join("");
   }).catch(()=>{g.innerHTML=""});
 }
+
+/* ===== ΩΡΑΡΙΟ ΜΠΑΡ (ώρα Ελλάδας) =====
+   Ο κύκλος στη γραμμή δείχνει την τωρινή ώρα ανάμεσα σε άνοιγμα και κλείσιμο. */
+const BAR_HOURS={OPEN:9,CLOSE:25,SWITCH:18};
+function dnTick(){
+  const dot=$("#dnDot"); if(!dot) return;
+  const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Athens",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+  const h=+parts.find(x=>x.type==="hour").value, mi=+parts.find(x=>x.type==="minute").value;
+  const o=BAR_HOURS.OPEN*60,c=BAR_HOURS.CLOSE*60,sw=BAR_HOURS.SWITCH*60;
+  let m=h*60+mi; if(m<o&&m+1440<c) m+=1440;          /* μετά τα μεσάνυχτα */
+  const open=m>=o&&m<c, p=open?(m-o)/(c-o):0;
+  const phase=!open?"closed":m<sw?"day":"night";
+  const box=$(".daynight"); box.dataset.phase=phase; box.style.setProperty("--p",p.toFixed(4));
+  $("#dnNow").textContent=t(phase==="day"?"dn.nowDay":phase==="night"?"dn.nowNight":"dn.closed");
+}
+setInterval(dnTick,60000);
 
 /* start */
 setLang(lang);
