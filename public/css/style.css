@@ -129,11 +129,14 @@ main section{padding-block:64px}
 /* availability */
 .book{display:grid;grid-template-columns:1fr 1.25fr;gap:40px;align-items:start}
 .book > *{min-width:0}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 84px)}
 .steps{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
 .step{font-size:.8rem;padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .step.on{background:var(--leaf);border-color:var(--leaf);color:var(--on-accent)}
 .step.done{border-color:var(--leaf);color:var(--leaf)}
+button.step{font:inherit;font-size:.8rem;background:none;line-height:inherit;cursor:default}
+button.step:not(:disabled){cursor:pointer}
+button.step.done:not(:disabled):hover{background:var(--leaf-soft)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field.full{grid-column:1/-1}
@@ -149,7 +152,6 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--leaf);outline-of
 .summary{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:.92rem;margin:16px 0}
 .summary dt{color:var(--muted)}
 .summary dd{margin:0;font-variant-numeric:tabular-nums}
-.ref{font-variant-numeric:tabular-nums;letter-spacing:.08em;font-weight:600}
 .partners{display:flex;flex-direction:column;gap:12px;margin-top:26px}
 .partners a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink);background:var(--surface)}
 .partners a:hover{border-color:var(--leaf)}
@@ -307,6 +309,7 @@ body.lb-open{overflow:hidden}
 .details-form{margin-top:22px}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap}
 .done-title{margin-top:8px}
+.done-title:focus{outline:none}
 .done-note{color:var(--muted);font-size:.92rem}
 .again-btn{margin-top:18px}
 .enquiry .sec-head{margin-bottom:20px}

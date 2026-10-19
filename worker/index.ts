@@ -6,7 +6,7 @@
 // Endpoints:
 //   GET  /api/rooms/:slug/calendar?from=2026-11-01&to=2026-12-31   τιμές + διαθεσιμότητα (από cache)
 //   POST /api/quote  { slug, checkIn, checkOut }                   τελική τιμή με ζωντανό έλεγχο
-//   POST /api/book   { slug, checkIn, checkOut, adults, guest:{name,email,phone}, country?, eta?, notes?, turnstileToken }
+//   POST /api/book   { slug, checkIn, checkOut, adults, guest:{name,email,phone}, country?, notes?, turnstileToken }
 //
 // Cron (κάθε 10'): τραβάει τιμές + κρατήσεις από Hosthub → ένα JSON στο KV.
 
@@ -73,12 +73,14 @@ const F = {
     guest_phone: b.guest.phone,
     guest_adults: b.adults,
     booking_value: { cents: Math.round(total * 100), currency },
-    notes: [
-      "Κράτηση από το site",
-      b.eta && `Ώρα άφιξης: ${b.eta}`,
-      b.country && `Χώρα: ${b.country}`,
-      b.notes && `Σημειώσεις: ${b.notes}`,
-    ].filter(Boolean).join(" · "),
+    // χώρα + παρατηρήσεις του πελάτη από τη φόρμα → σημειώσεις της κράτησης στο Hosthub
+    ...(() => {
+      const notes = [
+        b.country?.trim() && `Χώρα: ${b.country.trim()}`,
+        b.notes?.trim() && `Σημειώσεις: ${b.notes.trim()}`,
+      ].filter(Boolean).join("\n");
+      return notes ? { notes } : {};
+    })(),
   }),
 };
 // ─────────────────────────────────────────────────────────────
@@ -225,7 +227,7 @@ async function quote(env: Env, room: Room, checkIn: string, checkOut: string, ad
 // ---------- κράτηση ----------
 interface BookingInput {
   slug: string; checkIn: string; checkOut: string; adults: number; lang?: "el" | "en";
-  notes?: string; country?: string; eta?: string;
+  notes?: string; country?: string;
   guest: { name: string; email: string; phone: string }; turnstileToken: string;
 }
 
@@ -252,7 +254,6 @@ function validateGuest(b: BookingInput, room: Room): string | null {
   if (!Number.isInteger(b.adults) || b.adults < 1 || b.adults > room.maxGuests) return "invalid_guests";
   if (b.notes && String(b.notes).length > 1000) return "notes_too_long";
   if (b.country && String(b.country).length > 60) return "bad_request";
-  if (b.eta && String(b.eta).length > 30) return "bad_request";
   return null;
 }
 
@@ -309,7 +310,7 @@ async function sendEmails(env: Env, room: Room, b: BookingInput, total: number, 
   if (env.NOTIFY_EMAIL)
     jobs.push(send(env.NOTIFY_EMAIL, `Νέα κράτηση από το site – ${esc(b.guest.name)}`,
       `<p>${summary}</p><p>${esc(b.guest.email)} · ${esc(b.guest.phone)}</p>` +
-      `<p>${esc([b.eta, b.country, b.notes].filter(Boolean).join(" · "))}</p>`));
+      `<p>${esc([b.country, b.notes].filter(Boolean).join(" · "))}</p>`));
   await Promise.allSettled(jobs);
 }
 

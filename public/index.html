@@ -109,7 +109,7 @@
     </div>
 
     <div class="panel">
-      <div class="steps"><span class="step on" id="st1" data-i18n="step.1"></span><span class="step" id="st2" data-i18n="step.2"></span><span class="step" id="st3" data-i18n="step.3"></span></div>
+      <div class="steps"><button type="button" class="step on" id="st1" data-i18n="step.1" disabled></button><span class="step" id="st2" data-i18n="step.2"></span><span class="step" id="st3" data-i18n="step.3"></span></div>
 
       <form id="f1" novalidate>
         <div class="grid2">
@@ -131,9 +131,7 @@
             <div class="field"><label for="ln" data-i18n="f.ln"></label><input id="ln" autocomplete="family-name" required></div>
             <div class="field"><label for="em">Email</label><input id="em" type="email" autocomplete="email" required></div>
             <div class="field"><label for="ph" data-i18n="f.ph"></label><input id="ph" type="tel" autocomplete="tel" required></div>
-            <div class="field"><label for="ctry" data-i18n="f.ctry"></label><input id="ctry" autocomplete="country-name"></div>
-            <div class="field"><label for="eta" data-i18n="f.eta"></label>
-              <select id="eta"><option value="14:00–16:00">14:00–16:00</option><option value="16:00–18:00" selected>16:00–18:00</option><option value="18:00–20:00">18:00–20:00</option><option value="late" data-i18n="f.eta4"></option></select></div>
+            <div class="field full"><label for="ctry" data-i18n="f.ctry"></label><input id="ctry" autocomplete="country-name"></div>
             <div class="field full"><label for="notes" data-i18n="f.notes"></label><textarea id="notes" data-i18n-attr="placeholder:f.notesPh"></textarea></div>
             <label class="check field full" for="ok"><input type="checkbox" id="ok"> <span data-i18n="f.ok"></span></label>
             <div class="field full captcha" id="captcha"></div>
@@ -148,9 +146,9 @@
 
       <div id="done" hidden>
         <p class="eyebrow" data-i18n="done.eyebrow"></p>
-        <h3 class="done-title"><span data-i18n="done.thanks"></span> <span id="dName"></span>.</h3>
+        <h3 class="done-title" tabindex="-1"><span data-i18n="done.thanks"></span> <span id="dName"></span>.</h3>
         <dl class="summary" id="dSum"></dl>
-        <p class="done-note"><span data-i18n="done.note"></span> <span class="ref" id="dRef"></span></p>
+        <p class="done-note" data-i18n="done.note"></p>
         <button class="btn btn-ghost again-btn" type="button" id="again" data-i18n="done.again"></button>
       </div>
     </div>
@@ -277,11 +275,11 @@ el:{
   "avail.eyebrow":"Διαθεσιμότητα","avail.h2":"Κλείστε απευθείας με το Giardino","avail.lede":"Επιλέξτε ημερομηνίες και δωμάτιο. Αν υπάρχει διαθεσιμότητα, συμπληρώνετε τα στοιχεία σας και σας επιβεβαιώνουμε την κράτηση.",
   "step.1":"1 · Ημερομηνίες","step.2":"2 · Στοιχεία","step.3":"3 · Επιβεβαίωση",
   "f.ci":"Άφιξη","f.co":"Αναχώρηση","f.guests":"Επισκέπτες","f.room":"Δωμάτιο","f.check":"Έλεγχος διαθεσιμότητας",
-  "f.fn":"Όνομα","f.ln":"Επώνυμο","f.ph":"Τηλέφωνο","f.ctry":"Χώρα","f.ctryDefault":"Ελλάδα","f.eta":"Ώρα άφιξης (περίπου)","f.eta4":"Μετά τις 20:00",
+  "f.fn":"Όνομα","f.ln":"Επώνυμο","f.ph":"Τηλέφωνο","f.ctry":"Χώρα","f.ctryDefault":"Ελλάδα",
   "f.notes":"Σημειώσεις ή ειδικά αιτήματα","f.notesPh":"π.χ. επιπλέον κρεβάτι, θέση πάρκινγκ, επετειακή έκπληξη",
   "f.ok":"Συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου μόνο για την επεξεργασία της κράτησης.",
   "f.send":"Αποστολή κράτησης","f.back":"Αλλαγή ημερομηνιών",
-  "done.eyebrow":"Η αίτηση καταχωρήθηκε","done.thanks":"Ευχαριστούμε,","done.note":"Θα λάβετε επιβεβαίωση στο email σας. Κωδικός αίτησης:","done.again":"Νέα κράτηση",
+  "done.eyebrow":"Η αίτηση καταχωρήθηκε","done.thanks":"Ευχαριστούμε,","done.note":"Θα λάβετε επιβεβαίωση στο email σας.","done.again":"Νέα κράτηση",
   "dn.title":"Από τον πρώτο καφέ<br>ως το τελευταίο ποτήρι κρασί",
   "dn.nowDay":"Τώρα · ώρα για καφέ","dn.nowNight":"Τώρα · ώρα για ένα ποτήρι κρασί","dn.closed":"Ανοίγουμε στις 09:00",
   "dn.dayWhen":"Το πρωί","dn.dayH":"Ο καφές σας, με την ησυχία του",
@@ -349,11 +347,11 @@ en:{
   "avail.eyebrow":"Check Availability","avail.h2":"Book directly with Giardino","avail.lede":"Choose your dates and room. If it's available, fill in your details and we'll confirm your booking.",
   "step.1":"1 · Dates","step.2":"2 · Details","step.3":"3 · Confirmation",
   "f.ci":"Check-in","f.co":"Check-out","f.guests":"Guests","f.room":"Room","f.check":"Check availability",
-  "f.fn":"First name","f.ln":"Last name","f.ph":"Phone","f.ctry":"Country","f.ctryDefault":"Greece","f.eta":"Arrival time (approx.)","f.eta4":"After 20:00",
+  "f.fn":"First name","f.ln":"Last name","f.ph":"Phone","f.ctry":"Country","f.ctryDefault":"Greece",
   "f.notes":"Notes or special requests","f.notesPh":"e.g. extra bed, parking space, anniversary surprise",
   "f.ok":"I agree that my details will be used only to process this booking.",
   "f.send":"Send booking request","f.back":"Change dates",
-  "done.eyebrow":"Request received","done.thanks":"Thank you,","done.note":"You'll receive a confirmation by email. Request code:","done.again":"New booking",
+  "done.eyebrow":"Request received","done.thanks":"Thank you,","done.note":"You'll receive a confirmation by email.","done.again":"New booking",
   "dn.title":"From the first espresso<br>to the last glass of wine",
   "dn.nowDay":"Right now · coffee time","dn.nowNight":"Right now · time for a glass of wine","dn.closed":"We open at 09:00",
   "dn.dayWhen":"Mornings","dn.dayH":"Your coffee, taken slowly",
@@ -552,7 +550,6 @@ const today=new Date();today.setHours(12);
 const t1=new Date(today);t1.setDate(t1.getDate()+14);const t2=new Date(t1);t2.setDate(t2.getDate()+3);
 $("#ci").min=iso(today);$("#co").min=iso(today);$("#ci").value=iso(t1);$("#co").value=iso(t2);
 const fmt=s=>new Date(s+"T12:00").toLocaleDateString(lang==="en"?"en-GB":"el-GR",{weekday:"short",day:"numeric",month:"long",year:"numeric"});
-const etaText=()=>{const o=$("#eta").selectedOptions[0];return o?o.textContent:""};
 let booking={};
 const money=(v,cur)=>new Intl.NumberFormat(lang==="en"?"en-GB":"el-GR",{style:"currency",currency:cur||"EUR"}).format(v);
 
@@ -594,14 +591,24 @@ function captcha(){
     callback:v=>{tsToken=v},"expired-callback":()=>{tsToken=""},"error-callback":()=>{tsToken=""}});
 }
 
-function setStep(n){["st1","st2","st3"].forEach((id,i)=>{const el=$("#"+id);el.className="step"+(i+1===n?" on":i+1<n?" done":"")})}
+function setStep(n){
+  ["st1","st2","st3"].forEach((id,i)=>{const el=$("#"+id);el.className="step"+(i+1===n?" on":i+1<n?" done":"")});
+  $("#st1").disabled=n!==2;   /* επιστροφή στο βήμα 1 μόνο από το βήμα 2 */
+}
+/* μετακίνηση στην κάρτα της κράτησης (όχι στις συχνές ερωτήσεις) */
+function toPanel(focusEl){
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("#v-availability .panel").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
+  if(focusEl) focusEl.focus({preventScroll:true});
+}
+function backToDates(){$("#avail").hidden=true;$("#f1").hidden=false;setStep(1);toPanel($("#ci"))}
 function renderAvail(){
   const {ci,co,n,g,r,total,cur}=booking;
   $("#availBox").innerHTML=`<span class="eyebrow">${t("a.yes")}</span><b>${R(r).name}</b><span>${fmt(ci)} → ${fmt(co)} · ${n} ${t("a.nights")(n)} · ${g} ${t("a.guests")(g)}</span><span class="price">${t("a.total")}: <strong>${money(total,cur)}</strong></span>`;
 }
 function renderDone(){
   const b=booking;
-  $("#dSum").innerHTML=[[t("s.room"),R(b.r).name],[t("s.ci"),fmt(b.ci)+" · "+etaText()],[t("s.co"),fmt(b.co)],[t("s.nights"),b.n],[t("s.guests"),b.g],[t("s.total"),money(b.total,b.cur)],["Email",b.em],[t("s.phone"),b.ph]].map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+  $("#dSum").innerHTML=[[t("s.room"),R(b.r).name],[t("s.ci"),fmt(b.ci)],[t("s.co"),fmt(b.co)],[t("s.nights"),b.n],[t("s.guests"),b.g],[t("s.total"),money(b.total,b.cur)],["Email",b.em],[t("s.phone"),b.ph]].map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
 }
 
 /* Βήμα 1: έλεγχος διαθεσιμότητας + τιμή από το Hosthub */
@@ -626,7 +633,8 @@ $("#f1").addEventListener("submit",async e=>{
   $("#f1").hidden=true;$("#avail").hidden=false;setStep(2);$("#fn").focus();
   captcha();
 });
-$("#back").onclick=()=>{$("#avail").hidden=true;$("#f1").hidden=false;setStep(1)};
+$("#back").onclick=backToDates;
+$("#st1").onclick=()=>{if(!$("#avail").hidden)backToDates()};
 
 /* Βήμα 2: αποστολή κράτησης στο Hosthub */
 $("#f2").addEventListener("submit",async e=>{
@@ -643,25 +651,25 @@ $("#f2").addEventListener("submit",async e=>{
   const res=await api("/api/book",{
     slug:booking.r.id,checkIn:booking.ci,checkOut:booking.co,adults:booking.g,lang,
     guest:{name:`${fn} ${ln}`,email:em,phone:ph},
-    country:$("#ctry").value.trim(),eta:etaText(),notes:$("#notes").value.trim(),
+    country:$("#ctry").value.trim(),notes:$("#notes").value.trim(),
     turnstileToken:tsToken
   });
   busy(btn,false);
 
   if(!res.ok){
     if(["not_available","min_stay","max_stay","no_rate","no_arrival","no_departure"].includes(res.reason)){   /* κλείστηκε στο μεταξύ */
-      $("#avail").hidden=true;$("#f1").hidden=false;setStep(1);$("#e1").textContent=t("x.taken");return;
+      backToDates();$("#e1").textContent=t("x.taken");return;
     }
     $("#e2").textContent=reasonMsg(res);captcha();return;   /* κάθε token ισχύει μία φορά */
   }
 
   Object.assign(booking,{em,ph,lang,total:res.total,cur:res.currency});
-  const ref="GD-"+String(res.bookingId||Date.now().toString(36)).slice(-6).toUpperCase();
-  $("#dName").textContent=fn;$("#dRef").textContent=ref;
+  $("#dName").textContent=fn;
   renderDone();
   $("#avail").hidden=true;$("#done").hidden=false;setStep(3);
+  toPanel($(".done-title"));
 });
-$("#again").onclick=()=>{$("#f2").reset();$("#ctry").value=t("f.ctryDefault");$("#done").hidden=true;$("#f1").hidden=false;setStep(1)};
+$("#again").onclick=()=>{$("#f2").reset();$("#ctry").value=t("f.ctryDefault");$("#done").hidden=true;$("#f1").hidden=false;setStep(1);toPanel($("#ci"))};
 
 /* event enquiry */
 $("#fe").addEventListener("submit",e=>{
