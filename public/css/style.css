@@ -366,3 +366,21 @@ body.lb-open{overflow:hidden}
   .code-row input{max-width:none}
   .price-rows{padding:14px}
 }
+
+/* booking terms (dialog) */
+.terms-link{font:inherit;color:var(--leaf);font-weight:600;text-decoration:underline;text-underline-offset:2px;background:none;border:0;padding:0;cursor:pointer}
+.terms-link:hover{color:var(--ink)}
+.terms{width:min(720px,calc(100vw - 32px));max-height:min(86dvh,880px);padding:0;border:0;border-radius:var(--r);background:var(--surface);color:var(--ink);box-shadow:0 30px 80px -30px rgba(24,28,21,.6);overflow:hidden}
+.terms[open]{display:flex;flex-direction:column}
+.terms::backdrop{background:rgba(24,28,21,.6);backdrop-filter:blur(2px)}
+.terms-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px 16px 24px;border-bottom:1px solid var(--line);flex-shrink:0}
+.terms-head h2{font-size:1.6rem}
+.terms-close{width:42px;height:42px;flex-shrink:0;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:1.4rem;line-height:1;cursor:pointer}
+.terms-close:hover{background:var(--leaf-soft)}
+.terms-body{overflow-y:auto;overscroll-behavior:contain;padding:18px 24px 28px;font-size:.93rem;line-height:1.65;color:var(--muted)}
+.terms-body h3{font-family:var(--body);font-size:1rem;font-weight:600;color:var(--ink);margin:22px 0 6px}
+.terms-body p{margin:0 0 10px}
+.terms-body ul{margin:0 0 10px;padding-left:20px}
+.terms-body b{color:var(--ink);font-weight:600}
+.terms-body .upd{font-size:.82rem}
+@media (max-width:600px){.terms{width:calc(100vw - 20px);max-height:92dvh}.terms-head{padding:12px 12px 12px 18px}.terms-head h2{font-size:1.3rem}.terms-body{padding:14px 18px 22px}}

@@ -282,6 +282,12 @@
   <div class="lb-thumbs" id="lbThumbs"></div>
 </div>
 
+<!-- όροι κράτησης -->
+<dialog class="terms" id="terms" aria-labelledby="termsTitle">
+  <div class="terms-head"><h2 id="termsTitle"></h2><button type="button" class="terms-close" id="termsClose" data-i18n-attr="aria-label:lb.close">×</button></div>
+  <div class="terms-body" id="termsBody"></div>
+</dialog>
+
 <footer>
   <div class="wrap">
     <div class="fgrid">
@@ -328,7 +334,7 @@ el:{
   "f.ci":"Άφιξη","f.co":"Αναχώρηση","f.guests":"Επισκέπτες","f.room":"Δωμάτιο","f.check":"Έλεγχος διαθεσιμότητας",
   "f.fn":"Όνομα","f.ln":"Επώνυμο","f.ph":"Τηλέφωνο","f.ctry":"Χώρα","f.ctryDefault":"Ελλάδα",
   "f.notes":"Σημειώσεις ή ειδικά αιτήματα","f.notesPh":"π.χ. επιπλέον κρεβάτι, θέση πάρκινγκ, επετειακή έκπληξη",
-  "f.ok":"Συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου μόνο για την επεξεργασία της κράτησης.",
+  "f.ok":'Έχω διαβάσει και αποδέχομαι τους <button type="button" class="terms-link" data-terms>όρους κράτησης</button> και συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου μόνο για την επεξεργασία της κράτησης.',
   "f.next":"Συνέχεια","f.prev":"← Πίσω","f.finish":"Ολοκλήρωση κράτησης",
   "f.phCode":"Κωδικός χώρας","f.phPh":"π.χ. 6912345678","f.phHint":"Ο κωδικός χώρας είναι +30 (Ελλάδα). Για τηλέφωνο άλλης χώρας, αλλάξτε τον από τη λίστα.",
   "f.bf":"Θέλω πρωινό","f.bfPrice":"(+9 € ανά άτομο, ανά διανυκτέρευση)",
@@ -337,7 +343,7 @@ el:{
   "p.title":"Τιμή κράτησης","p.room":n=>`Δωμάτιο · ${n} ${n===1?"νύχτα":"νύχτες"}`,
   "p.bf":(g,n,pp)=>`Πρωινό · ${g} ${g===1?"άτομο":"άτομα"} × ${n} ${n===1?"νύχτα":"νύχτες"} × ${pp}`,
   "p.total":"Σύνολο","p.depH":"Απαιτείται προκαταβολή",
-  "p.dep":d=>`Για την επιβεβαίωση της κράτησής σας απαιτείται προκαταβολή: ${d}. Μετά την ολοκλήρωση της κράτησής σας, θα λάβετε email με οδηγίες για την καταβολή της προκαταβολής. Η κράτησή σας οριστικοποιείται μόνο μετά την πληρωμή της προκαταβολής.`,
+  "p.dep":d=>`Για την επιβεβαίωση της κράτησής σας απαιτείται προκαταβολή: ${d} . Μετά την ολοκλήρωση της κράτησής σας, θα λάβετε email με οδηγίες για την καταβολή της. Η κράτησή σας οριστικοποιείται μόνο μετά την πληρωμή της προκαταβολής.`,
   "v.title":"Επαλήθευση email","v.text":e=>`Για να ολοκληρωθεί η κράτηση, θα στείλουμε έναν 8ψήφιο κωδικό στο <b>${e}</b>.`,
   "v.send":"Αποστολή κωδικού","v.resend":"Επαναποστολή κωδικού","v.wait":s=>`Επαναποστολή σε ${s}`,
   "v.label":"Κωδικός επαλήθευσης (8 ψηφία)","v.check":"Επαλήθευση",
@@ -415,7 +421,7 @@ en:{
   "f.ci":"Check-in","f.co":"Check-out","f.guests":"Guests","f.room":"Room","f.check":"Check availability",
   "f.fn":"First name","f.ln":"Last name","f.ph":"Phone","f.ctry":"Country","f.ctryDefault":"Greece",
   "f.notes":"Notes or special requests","f.notesPh":"e.g. extra bed, parking space, anniversary surprise",
-  "f.ok":"I agree that my details will be used only to process this booking.",
+  "f.ok":'I have read and accept the <button type="button" class="terms-link" data-terms>booking terms</button> and agree that my details will be used only to process this booking.',
   "f.next":"Continue","f.prev":"← Back","f.finish":"Complete booking",
   "f.phCode":"Country code","f.phPh":"e.g. 6912345678","f.phHint":"The country code is set to +30 (Greece). For a phone number from another country, change it from the list.",
   "f.bf":"Add breakfast","f.bfPrice":"(+€9 per person, per night)",
@@ -424,7 +430,7 @@ en:{
   "p.title":"Booking price","p.room":n=>`Room · ${n} ${n===1?"night":"nights"}`,
   "p.bf":(g,n,pp)=>`Breakfast · ${g} ${g===1?"guest":"guests"} × ${n} ${n===1?"night":"nights"} × ${pp}`,
   "p.total":"Total","p.depH":"Deposit required",
-  "p.dep":d=>`A deposit is required to confirm your reservation: ${d}. After completing your booking, you will receive an email with instructions on how to pay the deposit. Your reservation is confirmed only once the deposit has been paid.`,
+  "p.dep":d=>`A deposit is required to confirm your reservation: ${d} . After completing your booking, you will receive an email with instructions on how to pay the deposit. Your reservation is confirmed only once the deposit has been paid.`,
   "v.title":"Email verification","v.text":e=>`To complete your booking, we'll send an 8-digit code to <b>${e}</b>.`,
   "v.send":"Send code","v.resend":"Resend code","v.wait":s=>`Resend in ${s}`,
   "v.label":"Verification code (8 digits)","v.check":"Verify",
@@ -437,7 +443,7 @@ en:{
   "dn.nowDay":"Right now · coffee time","dn.nowNight":"Right now · time for a glass of wine","dn.closed":"We open at 09:00",
   "dn.dayWhen":"Mornings","dn.dayH":"Your coffee, taken slowly",
   "dn.dayP":"From your morning coffee to a relaxing brunch, join us for the aroma of freshly brewed coffee and a laid-back atmosphere.",
-  "dn.nightWhen":"Evenings","dn.nightH":"A glass from right here",
+  "dn.nightWhen":"Evenings","dn.nightH":"A glass from our region",
   "dn.nightP":"Wines from local wineries, your favourite drinks and refreshing cocktails come together with food worth sharing.",
   "bar.galleryAria":"Photos of the café and bar","lb.bar":"Coffee & Bar",
   "ev.1e":"PERSONAL EVENTS","ev.1h":"Birthdays, anniversaries, celebrations","ev.1p":"From intimate birthday gatherings and wedding anniversaries to life’s special milestones, we create the perfect setting for moments worth celebrating.",
@@ -939,6 +945,96 @@ function dnTick(){
   $("#dnNow").textContent=t(phase==="day"?"dn.nowDay":phase==="night"?"dn.nowNight":"dn.closed");
 }
 setInterval(dnTick,60000);
+
+/* ===== ΟΡΟΙ ΚΡΑΤΗΣΗΣ (παράθυρο που ανοίγει από τη λέξη «όρους» στη φόρμα) =====
+   ⚠️ Συμπληρώστε τα στοιχεία σε [αγκύλες] στο BIZ. Τα υπόλοιπα κείμενα αλλάζουν παρακάτω (el / en). */
+const BIZ={
+  name:   {el:"[Νόμιμη επωνυμία επιχείρησης]", en:"[Legal business name]"},
+  afm:    "[ΑΦΜ επιχείρησης]",
+  updated:{el:"[Ημερομηνία]", en:"[Date]"},
+  address:{el:"Ευξείνου Πόντου 22, Δράμα", en:"22 Efxeinou Pontou, Drama, Greece"},
+  email:  "giardino@gmail.com",
+  phone:  "+30 2521 402133",
+  checkIn:"14:00", checkOut:"11:00",
+  url:    location.host
+};
+const TERMS={
+el:{title:"Όροι Κράτησης",body:()=>`
+<p class="upd"><b>Τελευταία ενημέρωση:</b> ${BIZ.updated.el}</p>
+<h3>1. Γενικές πληροφορίες</h3>
+<p>Η ιστοσελίδα ${BIZ.url} παρέχει πληροφορίες για το Giardino και τη δυνατότητα ελέγχου διαθεσιμότητας και κράτησης των διαθέσιμων δωματίων. Η διαχείριση των κρατήσεων πραγματοποιείται μέσω του συστήματος Hosthub.</p>
+<p><b>Στοιχεία επιχείρησης</b></p>
+<ul><li>Επωνυμία: ${BIZ.name.el}</li><li>Διεύθυνση: ${BIZ.address.el}</li><li>ΑΦΜ: ${BIZ.afm}</li><li>Email: ${BIZ.email}</li><li>Τηλέφωνο: ${BIZ.phone}</li></ul>
+<h3>2. Διαδικασία κράτησης</h3>
+<p>Ο επισκέπτης μπορεί να ελέγξει τη διαθεσιμότητα των δωματίων, τις ημερομηνίες διαμονής και τις αντίστοιχες τιμές μέσω της ιστοσελίδας. Η κράτηση ολοκληρώνεται σύμφωνα με τη διαδικασία που εμφανίζεται κατά την κράτηση και επιβεβαιώνεται με σχετική ενημέρωση προς τον επισκέπτη.</p>
+<p>Ο επισκέπτης οφείλει να παρέχει ακριβή και πλήρη στοιχεία που είναι απαραίτητα για τη διαχείριση της κράτησης.</p>
+<h3>3. Τιμές και πληρωμές</h3>
+<p>Οι τιμές, οι τυχόν φόροι ή πρόσθετες χρεώσεις, καθώς και οι όροι πληρωμής εμφανίζονται πριν από την ολοκλήρωση της κράτησης. Η τελική τιμή και οι όροι που ισχύουν για κάθε κράτηση αναφέρονται στην επιβεβαίωσή της.</p>
+<p>Η πληρωμή, η προκαταβολή ή η εγγύηση πραγματοποιούνται σύμφωνα με τους όρους που γνωστοποιούνται στον επισκέπτη πριν από την επιβεβαίωση.</p>
+<h3>4. Ακυρώσεις και τροποποιήσεις</h3>
+<p>Οι όροι ακύρωσης, επιστροφής χρημάτων και τροποποίησης ημερομηνιών εξαρτώνται από την πολιτική που εμφανίζεται για τη συγκεκριμένη κράτηση. Ο επισκέπτης θα πρέπει να ελέγχει την πολιτική αυτή πριν ολοκληρώσει την κράτηση.</p>
+<p>Για ακύρωση ή αλλαγή κράτησης, ο επισκέπτης μπορεί να επικοινωνήσει στο ${BIZ.email} ή στο ${BIZ.phone}, αναφέροντας τον αριθμό κράτησης.</p>
+<h3>5. Άφιξη και αναχώρηση</h3>
+<p>Οι ώρες άφιξης και αναχώρησης γνωστοποιούνται πριν από την ολοκλήρωση της κράτησης ή στην επιβεβαίωσή της.</p>
+<ul><li>Άφιξη (check-in): ${BIZ.checkIn}</li><li>Αναχώρηση (check-out): ${BIZ.checkOut}</li></ul>
+<p>Για ειδικά αιτήματα, όπως πρόωρη άφιξη ή καθυστερημένη αναχώρηση, απαιτείται προηγούμενη συνεννόηση με την επιχείρηση και σχετική επιβεβαίωση.</p>
+<h3>6. Υποχρεώσεις επισκεπτών</h3>
+<p>Οι επισκέπτες οφείλουν να χρησιμοποιούν τα δωμάτια και τις εγκαταστάσεις με υπευθυνότητα, να σέβονται τους υπόλοιπους επισκέπτες και να τηρούν τους κανόνες λειτουργίας της επιχείρησης.</p>
+<p>Τυχόν ειδικοί κανόνες, όπως η πολιτική καπνίσματος, η φιλοξενία κατοικίδιων και ο μέγιστος αριθμός ατόμων ανά δωμάτιο, γνωστοποιούνται πριν από την κράτηση.</p>
+<h3>7. Διαθεσιμότητα και τεχνικά ζητήματα</h3>
+<p>Η διαθεσιμότητα και οι τιμές εμφανίζονται μέσω του συστήματος κρατήσεων Hosthub. Σε περίπτωση τεχνικού σφάλματος ή ασυμφωνίας στα στοιχεία κράτησης, ο επισκέπτης καλείται να επικοινωνήσει με την επιχείρηση για έλεγχο και διευκρινίσεις.</p>
+<p>Η επιχείρηση καταβάλλει εύλογες προσπάθειες για την ορθή λειτουργία της ιστοσελίδας, χωρίς αυτό να περιορίζει δικαιώματα του καταναλωτή που προβλέπονται από την ισχύουσα νομοθεσία.</p>
+<h3>8. Προσωπικά δεδομένα</h3>
+<p>Η επεξεργασία προσωπικών δεδομένων πραγματοποιείται σύμφωνα με την Πολιτική Απορρήτου της ιστοσελίδας και την ισχύουσα νομοθεσία περί προστασίας προσωπικών δεδομένων.</p>
+<h3>9. Εφαρμοστέο δίκαιο</h3>
+<p>Οι παρόντες όροι διέπονται από το εφαρμοστέο ελληνικό και ενωσιακό δίκαιο. Τυχόν διαφορές επιλύονται από τα αρμόδια δικαστήρια σύμφωνα με τους εφαρμοστέους κανόνες δικαιοδοσίας και με την επιφύλαξη των υποχρεωτικών δικαιωμάτων των καταναλωτών.</p>
+<h3>10. Επικοινωνία</h3>
+<p>Για ερωτήσεις σχετικά με κρατήσεις, ακυρώσεις ή τους παρόντες όρους, μπορείτε να επικοινωνήσετε:</p>
+<ul><li>Email: ${BIZ.email}</li><li>Τηλέφωνο: ${BIZ.phone}</li><li>Διεύθυνση: ${BIZ.address.el}</li></ul>`},
+en:{title:"Booking Terms",body:()=>`
+<p class="upd"><b>Last updated:</b> ${BIZ.updated.en}</p>
+<h3>1. General information</h3>
+<p>The website ${BIZ.url} provides information about Giardino and allows visitors to check availability and book the available rooms. Bookings are managed through the Hosthub system.</p>
+<p><b>Business details</b></p>
+<ul><li>Legal name: ${BIZ.name.en}</li><li>Address: ${BIZ.address.en}</li><li>VAT number (ΑΦΜ): ${BIZ.afm}</li><li>Email: ${BIZ.email}</li><li>Phone: ${BIZ.phone}</li></ul>
+<h3>2. Booking process</h3>
+<p>Guests can check room availability, dates of stay and the corresponding prices on the website. A booking is completed following the process shown during booking and is confirmed by a notification sent to the guest.</p>
+<p>Guests must provide accurate and complete information as required to manage the booking.</p>
+<h3>3. Prices and payments</h3>
+<p>Prices, any taxes or additional charges, and the payment terms are shown before the booking is completed. The final price and the terms that apply to each booking are stated in its confirmation.</p>
+<p>Payment, deposit or guarantee is made in accordance with the terms communicated to the guest before confirmation.</p>
+<h3>4. Cancellations and changes</h3>
+<p>The terms for cancellation, refunds and changes of dates depend on the policy shown for the specific booking. Guests should review this policy before completing their booking.</p>
+<p>To cancel or change a booking, guests can contact us at ${BIZ.email} or ${BIZ.phone}, quoting their booking reference.</p>
+<h3>5. Check-in and check-out</h3>
+<p>Check-in and check-out times are communicated before the booking is completed or in its confirmation.</p>
+<ul><li>Check-in: ${BIZ.checkIn}</li><li>Check-out: ${BIZ.checkOut}</li></ul>
+<p>Special requests, such as early check-in or late check-out, require prior arrangement with the business and confirmation.</p>
+<h3>6. Guest obligations</h3>
+<p>Guests must use the rooms and facilities responsibly, respect other guests and follow the house rules of the business.</p>
+<p>Any specific rules, such as the smoking policy, pets and the maximum number of guests per room, are communicated before booking.</p>
+<h3>7. Availability and technical issues</h3>
+<p>Availability and prices are displayed through the Hosthub booking system. In the event of a technical error or a discrepancy in the booking details, guests are asked to contact the business for verification and clarification.</p>
+<p>The business makes reasonable efforts to ensure the website works correctly, without this limiting any consumer rights provided by applicable law.</p>
+<h3>8. Personal data</h3>
+<p>Personal data is processed in accordance with the website's Privacy Policy and applicable data protection law.</p>
+<h3>9. Governing law</h3>
+<p>These terms are governed by applicable Greek and European Union law. Any disputes are resolved by the competent courts in accordance with the applicable rules of jurisdiction, without prejudice to consumers' mandatory rights.</p>
+<h3>10. Contact</h3>
+<p>For questions about bookings, cancellations or these terms, you can contact us:</p>
+<ul><li>Email: ${BIZ.email}</li><li>Phone: ${BIZ.phone}</li><li>Address: ${BIZ.address.en}</li></ul>`}
+};
+function openTerms(from){
+  const T=TERMS[lang]||TERMS.el,d=$("#terms");
+  $("#termsTitle").textContent=T.title;
+  $("#termsBody").innerHTML=T.body();
+  d._from=from||null;
+  document.body.classList.add("lb-open");
+  d.showModal(); $("#termsBody").scrollTop=0; $("#termsClose").focus();
+}
+$("#termsClose").onclick=()=>$("#terms").close();
+$("#terms").addEventListener("close",()=>{const d=$("#terms");document.body.classList.remove("lb-open");if(d._from)d._from.focus()});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-terms]");if(!b)return;e.preventDefault();e.stopPropagation();openTerms(b)});
 
 /* start */
 setLang(lang);
