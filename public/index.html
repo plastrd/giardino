@@ -25,9 +25,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Commissioner:wght@300;400;500;600&display=swap">
 <link rel="stylesheet" href="css/style.css">
+<script>/* intro screen: only on the first open of the site in this visit */
+try{if(!sessionStorage.getItem("gi-intro"))document.documentElement.classList.add("intro-on")}catch(e){}</script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
+<div class="intro" id="intro" aria-hidden="true"><span class="intro-frame"></span><span class="intro-h"></span><span class="intro-v"></span><div class="intro-c"><img src="img/mark.png" alt=""><span class="intro-bar"></span></div></div>
 <header>
   <div class="wrap nav">
     <a class="brand" href="#home" data-go="home" data-i18n-attr="aria-label:brand.aria"><img src="img/wordmark.png" alt="Giardino · Espresso Wine Bar &amp; High Living Suites"></a>
@@ -64,9 +67,8 @@
     </div>
   </div>
   </div>
-  <section>
+  <section class="tiles-band">
     <div class="wrap">
-      <div class="sec-head"><p class="eyebrow" data-i18n="home.eyebrow"></p></div>
       <div class="tiles">
         <a class="tile" href="#rooms" data-go="rooms"><h3 data-i18n="tile.1h"></h3><p data-i18n="tile.1p"></p><span class="go" data-i18n="tile.1go"></span></a>
         <a class="tile" href="#bar" data-go="bar"><h3 data-i18n="tile.2h"></h3><p data-i18n="tile.2p"></p><span class="go" data-i18n="tile.2go"></span></a>
@@ -92,20 +94,21 @@
   <section><div class="wrap">
     <div class="sec-head"><p class="eyebrow" data-i18n="rooms.eyebrow"></p><h2 data-i18n="rooms.h2"></h2><p class="lede" data-i18n="rooms.lede"></p></div>
     <div class="rooms" id="roomList"></div>
-    <div class="amen">
+  </div></section>
+  <div class="amen-band"><div class="wrap amen">
       <div><b data-i18n="amen.1b"></b><span data-i18n="amen.1s"></span></div>
       <div><b data-i18n="amen.2b"></b><span data-i18n="amen.2s"></span></div>
       <div><b data-i18n="amen.3b"></b><span data-i18n="amen.3s"></span></div>
       <div><b data-i18n="amen.4b"></b><span data-i18n="amen.4s"></span></div>
-    </div>
-  </div></section>
+  </div></div>
 </div>
 
 <!-- AVAILABILITY -->
 <div class="view" id="v-availability" hidden>
   <section><div class="wrap book">
-    <div>
-      <div class="sec-head"><p class="eyebrow" data-i18n="avail.eyebrow"></p><h2 data-i18n="avail.h2"></h2><p class="lede" data-i18n="avail.lede"></p></div>
+    <div class="book-side">
+      <img class="book-wm" src="img/mark.png" alt="">
+      <div class="sec-head book-intro"><p class="eyebrow" data-i18n="avail.eyebrow"></p><h2 data-i18n="avail.h2"></h2><p class="lede" data-i18n="avail.lede"></p></div>
     </div>
 
     <div class="panel">
@@ -120,8 +123,8 @@
       <!-- Βήμα 1 · Ημερομηνίες -->
       <form id="f1" novalidate>
         <div class="grid2">
-          <div class="field"><label for="ci" data-i18n="f.ci"></label><input type="date" id="ci" required></div>
-          <div class="field"><label for="co" data-i18n="f.co"></label><input type="date" id="co" required></div>
+          <div class="field dp-field"><label for="ci" data-i18n="f.ci"></label><button type="button" class="dpick" id="ci" value="" aria-haspopup="dialog" aria-expanded="false"><span class="dp-txt"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button></div>
+          <div class="field dp-field"><label for="co" data-i18n="f.co"></label><button type="button" class="dpick" id="co" value="" aria-haspopup="dialog" aria-expanded="false"><span class="dp-txt"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button></div>
           <div class="field"><label for="guests" data-i18n="f.guests"></label>
             <select id="guests"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
           <div class="field"><label for="room" data-i18n="f.room"></label><select id="room"></select></div>
@@ -237,7 +240,7 @@
       <form id="fe" novalidate>
         <div class="grid2">
           <div class="field"><label for="evType" data-i18n="enq.type"></label><select id="evType"><option data-i18n="enq.o1"></option><option data-i18n="enq.o2"></option><option data-i18n="enq.o3"></option><option data-i18n="enq.o4"></option></select></div>
-          <div class="field"><label for="evDate" data-i18n="enq.date"></label><input type="date" id="evDate"></div>
+          <div class="field dp-field"><label for="evDate" data-i18n="enq.date"></label><button type="button" class="dpick" id="evDate" value="" aria-haspopup="dialog" aria-expanded="false"><span class="dp-txt"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button></div>
           <div class="field"><label for="evPeople" data-i18n="enq.people"></label><input type="number" id="evPeople" min="1" value="40"></div>
           <div class="field"><label for="evContact" data-i18n="enq.contact"></label><input id="evContact" required></div>
         </div>
@@ -295,7 +298,7 @@
       <div><h4 data-i18n="ft.addr"></h4><p data-i18n="ft.addrText"></p>
         <p class="map-link"><a href="https://www.google.com/maps/search/?api=1&query=GIARDINO+High+living+suites+%26+espresso+wine+bar" target="_blank" rel="noopener" data-i18n="ft.map"></a></p></div>
       <div><h4 data-i18n="ft.contact"></h4>
-        <ul>
+        <ul class="copies">
           <li class="copy"><a href="tel:+302521402133" id="phone">+30 2521 402133</a><button type="button" data-copy="phone" data-i18n="ft.copy"></button></li>
           <li class="copy"><a href="mailto:giardino@gmail.com" id="email">giardino@gmail.com</a><button type="button" data-copy="email" data-i18n="ft.copy"></button></li>
         </ul></div>
@@ -305,7 +308,7 @@
           <li><a href="https://www.instagram.com/giardino.drama/" target="_blank" rel="noopener" id="ig">Instagram ↗</a></li>
         </ul></div>
     </div>
-    <div class="fbottom"><span>© <span id="yr"></span> Giardino · <span data-i18n="ft.city"></span></span><span data-i18n="ft.partners"></span></div>
+    <div class="fbottom"><span>© <span id="yr"></span> Giardino · <span data-i18n="ft.city"></span> · <span class="powered" lang="en">Powered by PP.com</span></span><span data-i18n="ft.partners"></span></div>
   </div>
 </footer>
 
@@ -322,7 +325,7 @@ el:{
   "home.eyebrow":"Στο Giardino",
   "ig.h2":"Ακολουθήστε μας","ig.btn":"Ακολουθήστε μας στο Instagram ↗","ig.post":"Ανάρτηση στο Instagram",
   "tile.1h":"Δωμάτια","tile.1p":"Δωμάτια με ησυχία, άνεση και όλα όσα χρειάζεστε για σύντομη ή μεγαλύτερη διαμονή.","tile.1go":"Τα δωμάτια →",
-  "tile.2h":"Καφέ &amp; Μπαρ","tile.2p":"Ο κάτω χώρος φιλοξενεί δεξιώσεις, ζωνατανές βραδιές και ιδιωτικές εκδηλώσεις.","tile.2go":"Το bar →",
+  "tile.2h":"Καφέ &amp; Μπαρ","tile.2p":"Ο κάτω χώρος φιλοξενεί δεξιώσεις, ζωνατανές βραδιές και ιδιωτικές εκδηλώσεις.","tile.2go":"Το Μπαρ →",
   "tile.3h":"Τουρισμός στη Δράμα","tile.3p":"Ιδέες για να γνωρίσετε την πόλη και τη γύρω περιοχή κατά τη διαμονή σας.","tile.3go":"Εξερευνήστε →",
   "rooms.eyebrow":"Δωμάτια","rooms.h2":"Δύο δωμάτια, το καθένα με τον δικό του χαρακτήρα","rooms.lede":"Κάθε δωμάτιο είναι σχεδιασμένο για να νιώθετε σαν στο σπίτι σας, με την άνεση ενός ξενοδοχείου.",
   "amen.1b":"Wi-Fi","amen.1s":"Δωρεάν, υψηλής ταχύτητας",
@@ -331,7 +334,7 @@ el:{
   "amen.4b":"Self check-in","amen.4s":"Ευέλικτη άφιξη",
   "avail.eyebrow":"Διαθεσιμότητα","avail.h2":"Κλείστε απευθείας με το Giardino","avail.lede":"Επιλέξτε ημερομηνίες και δωμάτιο. Αν υπάρχει διαθεσιμότητα, συμπληρώνετε τα στοιχεία σας και σας επιβεβαιώνουμε την κράτηση.",
   "step.aria":"Βήματα κράτησης","step.1":"1 · Ημερομηνίες","step.2":"2 · Στοιχεία","step.3":"3 · Τιμή","step.4":"4 · Επαλήθευση","step.5":"5 · Ολοκλήρωση",
-  "f.ci":"Άφιξη","f.co":"Αναχώρηση","f.guests":"Επισκέπτες","f.room":"Δωμάτιο","f.check":"Έλεγχος διαθεσιμότητας",
+  "f.ci":"Άφιξη","f.co":"Αναχώρηση","f.pick":"Επιλέξτε","dp.prev":"Προηγούμενος μήνας","dp.next":"Επόμενος μήνας","dp.arr":"Άφιξη","dp.cal":"Ημερολόγιο","f.guests":"Επισκέπτες","f.room":"Δωμάτιο","f.check":"Έλεγχος διαθεσιμότητας",
   "f.fn":"Όνομα","f.ln":"Επώνυμο","f.ph":"Τηλέφωνο","f.ctry":"Χώρα","f.ctryDefault":"Ελλάδα",
   "f.notes":"Σημειώσεις ή ειδικά αιτήματα","f.notesPh":"π.χ. επιπλέον κρεβάτι, θέση πάρκινγκ, επετειακή έκπληξη",
   "f.ok":'Έχω διαβάσει και αποδέχομαι τους <button type="button" class="terms-link" data-terms>όρους κράτησης</button> και συμφωνώ να χρησιμοποιηθούν τα στοιχεία μου μόνο για την επεξεργασία της κράτησης.',
@@ -348,7 +351,7 @@ el:{
   "v.send":"Αποστολή κωδικού","v.resend":"Επαναποστολή κωδικού","v.wait":s=>`Επαναποστολή σε ${s}`,
   "v.label":"Κωδικός επαλήθευσης (8 ψηφία)","v.check":"Επαλήθευση",
   "v.sent":e=>`Στείλαμε κωδικό στο ${e}. Ελέγξτε και τα ανεπιθύμητα.`,
-  "v.ok":"✓ Το email επαληθεύτηκε","v.bad":"✕ Λάθος κωδικός. Ελέγξτε τον και δοκιμάστε ξανά.","v.len":"✕ Ο κωδικός έχει 8 ψηφία.",
+  "v.ok":"Το email επαληθεύτηκε","v.bad":"Λάθος κωδικός. Ελέγξτε τον και δοκιμάστε ξανά.","v.len":"Ο κωδικός έχει 8 ψηφία.",
   "v.need":"Επαληθεύστε πρώτα το email σας.","v.expired":"Ο κωδικός δεν ισχύει πια. Στείλτε νέο κωδικό.",
   "s.bf":"Πρωινό","s.yes":"Ναι","s.no":"Όχι","s.deposit":"Προκαταβολή",
   "done.eyebrow":"Η αίτηση καταχωρήθηκε","done.thanks":"Ευχαριστούμε,","done.note":"Θα λάβετε επιβεβαίωση στο email σας.","done.again":"Νέα κράτηση",
@@ -373,6 +376,7 @@ el:{
   "faq.q5":"Μπορώ να ακυρώσω την κράτησή μου;","faq.a5":"Η πολιτική ακύρωσης αναφέρεται στην επιβεβαίωση της κράτησης. Για κρατήσεις μέσω Booking ή Airbnb ισχύει η πολιτική της κάθε πλατφόρμας.",
   "faq.q6":"Μπορούμε να κάνουμε δεξίωση ή ιδιωτική εκδήλωση στο μπαρ;","faq.a6":"Ναι. Ο κάτω χώρος φιλοξενεί δεξιώσεις, ζωντανές μουσικές βραδιές και ιδιωτικές εκδηλώσεις. Συμπληρώστε τη φόρμα που θα βρείτε στη σελίδα Καφέ &amp; Μπαρ ή καλέστε μας.",
   "faq.q7":"Επιτρέπονται κατοικίδια;","faq.a7":"Επικοινωνήστε μαζί μας πριν την κράτηση για να σας ενημερώσουμε για το συγκεκριμένο δωμάτιο.",
+  "ft.addr":"Διεύθυνση","ft.addrText":"Ευξείνου Πόντου 22<br>Δράμα","ft.map":"Οδηγίες στον χάρτη ↗","ft.contact":"Επικοινωνία","ft.copy":"Αντιγραφή","ft.copied":"Αντιγράφηκε",
   "ft.city":"Δράμα","ft.partners":'Συνεργαζόμαστε με <a href="https://www.booking.com/searchresults.html?city=-816779&highlighted_hotels=8047564" target="_blank" rel="noopener">Booking.com ↗</a> · <a href="https://www.airbnb.com/rooms/53923210" target="_blank" rel="noopener">Airbnb ↗</a>',
   /* dynamic texts */
   "r.upTo":c=>`Έως ${c} άτομα`,"r.book":"Κράτηση →","r.opt":c=>`έως ${c}`,"r.photo":"Φωτογραφία δωματίου","lb.close":"Κλείσιμο","lb.prev":"Προηγούμενη φωτογραφία","lb.next":"Επόμενη φωτογραφία","lb.open":(n,i)=>`Προβολή φωτογραφίας ${i} από ${n}`,
@@ -418,7 +422,7 @@ en:{
   "amen.4b":"Self check-in","amen.4s":"Flexible arrival",
   "avail.eyebrow":"Check Availability","avail.h2":"Book directly with Giardino","avail.lede":"Choose your dates and room. If it's available, fill in your details and we'll confirm your booking.",
   "step.aria":"Booking steps","step.1":"1 · Dates","step.2":"2 · Details","step.3":"3 · Price","step.4":"4 · Verification","step.5":"5 · Done",
-  "f.ci":"Check-in","f.co":"Check-out","f.guests":"Guests","f.room":"Room","f.check":"Check availability",
+  "f.ci":"Check-in","f.co":"Check-out","f.pick":"Select","dp.prev":"Previous month","dp.next":"Next month","dp.arr":"Check-in","dp.cal":"Calendar","f.guests":"Guests","f.room":"Room","f.check":"Check availability",
   "f.fn":"First name","f.ln":"Last name","f.ph":"Phone","f.ctry":"Country","f.ctryDefault":"Greece",
   "f.notes":"Notes or special requests","f.notesPh":"e.g. extra bed, parking space, anniversary surprise",
   "f.ok":'I have read and accept the <button type="button" class="terms-link" data-terms>booking terms</button> and agree that my details will be used only to process this booking.',
@@ -435,7 +439,7 @@ en:{
   "v.send":"Send code","v.resend":"Resend code","v.wait":s=>`Resend in ${s}`,
   "v.label":"Verification code (8 digits)","v.check":"Verify",
   "v.sent":e=>`We've sent a code to ${e}. Please also check your spam folder.`,
-  "v.ok":"✓ Email verified","v.bad":"✕ Wrong code. Please check it and try again.","v.len":"✕ The code has 8 digits.",
+  "v.ok":"Email verified","v.bad":"Wrong code. Please check it and try again.","v.len":"The code has 8 digits.",
   "v.need":"Please verify your email first.","v.expired":"This code is no longer valid. Please send a new one.",
   "s.bf":"Breakfast","s.yes":"Yes","s.no":"No","s.deposit":"Deposit",
   "done.eyebrow":"Request received","done.thanks":"Thank you,","done.note":"You'll receive a confirmation by email.","done.again":"New booking",
@@ -522,6 +526,33 @@ const IG_COUNT=6;
 const TURNSTILE_SITEKEY="1x00000000000000000000AA";
 const $=s=>document.querySelector(s);
 
+/* messages: show a message and mark the field that needs attention */
+function fail(sel,msg,field){
+  $(sel).classList.remove("ok");$(sel).textContent=msg;
+  const f=field&&$(field); if(!f) return;
+  f.setAttribute("aria-invalid","true");
+  f.focus({preventScroll:true});
+}
+function clearErr(sel){
+  $(sel).textContent="";
+  $(sel).closest("form,.panel")?.querySelectorAll('[aria-invalid="true"]').forEach(x=>{if(x.id!=="vCode")x.removeAttribute("aria-invalid")});
+}
+/* the mark goes away as soon as the guest edits the field */
+document.addEventListener("input",e=>{const f=e.target;if(f.id!=="vCode"&&f.getAttribute?.("aria-invalid")==="true")f.removeAttribute("aria-invalid")});
+document.addEventListener("change",e=>{const f=e.target;if(f.id!=="vCode"&&f.getAttribute?.("aria-invalid")==="true")f.removeAttribute("aria-invalid")});
+/* each new message gets a short entrance and is brought into view if it is off-screen */
+function watchMsg(el){
+  let last="";
+  new MutationObserver(()=>{
+    const txt=el.textContent.trim(); if(!txt||txt===last){last=txt;return} last=txt;
+    el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");
+    setTimeout(()=>{const r=el.getBoundingClientRect();
+      if(r.top<70||r.bottom>innerHeight){const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+        el.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})}},450);
+  }).observe(el,{childList:true,characterData:true,subtree:true});
+}
+document.querySelectorAll(".err,#vStatus").forEach(watchMsg);
+
 /* language */
 let lang="el";
 try{const s=localStorage.getItem("lang");if(s in STR)lang=s}catch(_){}
@@ -543,7 +574,7 @@ function setLang(l){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
   /* country field: swap only if it still holds the default value */
   const c=$("#ctry"); if(!c.value||c.value===STR[prev]["f.ctryDefault"]) c.value=t("f.ctryDefault");
-  renderRooms(); renderBar(); renderPhoneCodes(); dnTick();
+  renderRooms(); renderBar(); renderPhoneCodes(); dnTick(); dpRefresh();
   if(step===2){renderAvail();renderBf()}
   if(step===3) renderPrice();
   if(step===4){renderVerify();if(V.ok)setVStatus("good",t("v.ok"))}
@@ -554,9 +585,54 @@ document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",(
 
 /* views */
 const VIEWS=["home","rooms","availability","bar","tourism"];
+/* FAQ: on every tab, the questions rise in one by one the first time the guest scrolls to them
+   (like Coffee & Bar); within the same tab they then stay put */
+const FAQ_FX={box:document.querySelector("#faq .faq"),io:null,tab:null};
+function faqArm(tab){
+  const {box}=FAQ_FX;
+  if(!box||!("IntersectionObserver" in window)||matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if(tab===FAQ_FX.tab) return; FAQ_FX.tab=tab;
+  FAQ_FX.io?.disconnect();
+  box.querySelectorAll("details").forEach((d,i)=>{d.style.setProperty("--i",i);d.open=false});
+  box.classList.remove("faq-show");box.classList.add("faq-wait");
+  FAQ_FX.io=new IntersectionObserver(es=>{
+    if(!es.some(e=>e.isIntersecting)) return;
+    box.classList.remove("faq-wait");void box.offsetWidth;box.classList.add("faq-show");FAQ_FX.io.disconnect();
+  },{threshold:.15,rootMargin:"0px 0px -8% 0px"});
+  requestAnimationFrame(()=>FAQ_FX.io.observe(box));
+}
+/* Home (buttons, tiles, Instagram), Rooms (intro, room cards, amenities band), Coffee & Bar photos/texts/enquiry form and the booking intro/form rise in from below the first time each one scrolls
+   into view on this tab (same motion as the FAQ); on another visit to the tab they play again */
+const RV={io:null,tab:null,sel:"#barGallery .ph, .events .event, .book-intro > *, #v-rooms .sec-head > *, #roomList .room, .amen > div, #v-availability .book > .panel, .enquiry, .tiles .tile, #v-home .hero .btn, .ig-sec .sec-head > *, #igGrid .ig-item, .ig-sec .wrap > .btn"};
+function revealArm(tab){
+  if(tab===RV.tab) return; RV.tab=tab;
+  RV.io?.disconnect();
+  const root=document.getElementById("v-"+tab);
+  if(!root||!("IntersectionObserver" in window)||matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const els=[...root.querySelectorAll(RV.sel)];
+  els.forEach(el=>{el.classList.remove("rv-show");el.classList.add("rv-wait")});
+  RV.io=new IntersectionObserver(es=>{
+    const hits=es.filter(e=>e.isIntersecting).map(e=>e.target)
+      .sort((a,b)=>{const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect();return (ra.top-rb.top)||(ra.left-rb.left)});
+    hits.forEach((el,i)=>{
+      RV.io.unobserve(el);
+      el.style.setProperty("--d",`${i*110}ms`);
+      el.classList.remove("rv-wait");void el.offsetWidth;el.classList.add("rv-show");
+    });
+  },{threshold:.12,rootMargin:"0px 0px -6% 0px"});
+  requestAnimationFrame(()=>els.forEach(el=>RV.io.observe(el)));
+}
+/* content that arrives later (e.g. the Instagram photos) joins the same effect if its tab is open */
+function revealAdd(els){
+  if(!RV.io) return;
+  const view=document.getElementById("v-"+RV.tab); if(!view) return;
+  els.forEach(el=>{if(!view.contains(el))return;el.classList.add("rv-wait");RV.io.observe(el)});
+}
 function show(v,scroll=true){
   if(!VIEWS.includes(v)) v="home";
   VIEWS.forEach(x=>$("#v-"+x).hidden=x!==v);
+  faqArm(v);
+  revealArm(v);
   document.querySelectorAll(".links a").forEach(a=>{if(a.dataset.go===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
   $("#links").classList.remove("open");$("#menuBtn").setAttribute("aria-expanded","false");
   if(scroll) window.scrollTo({top:0,behavior:"auto"});
@@ -638,9 +714,101 @@ $("#lbStage").addEventListener("touchend",e=>{if(sx===null)return;const dx=e.cha
 const iso=d=>d.toISOString().slice(0,10);
 const today=new Date();today.setHours(12);
 const t1=new Date(today);t1.setDate(t1.getDate()+14);const t2=new Date(t1);t2.setDate(t2.getDate()+3);
-$("#ci").min=iso(today);$("#co").min=iso(today);$("#ci").value=iso(t1);$("#co").value=iso(t2);
+$("#ci").value=iso(t1);$("#co").value=iso(t2);
 const fmt=s=>new Date(s+"T12:00").toLocaleDateString(lang==="en"?"en-GB":"el-GR",{weekday:"short",day:"numeric",month:"long",year:"numeric"});
 let booking={};
+/* ── date picker for arrival / departure (and the event date in Coffee & Bar) ──
+   Departure opens on the arrival month, days before it are greyed out,
+   and the arrival day is marked in soft green. */
+const DP={id:null,y:0,m:0,cal:null};
+const dpPad=n=>String(n).padStart(2,"0");
+const dpISO=(y,m,d)=>`${y}-${dpPad(m+1)}-${dpPad(d)}`;
+const dpAdd=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return dpISO(d.getFullYear(),d.getMonth(),d.getDate())};
+const dpLoc=()=>lang==="en"?"en-GB":"el-GR";
+const dpToday=()=>{const d=new Date();return dpISO(d.getFullYear(),d.getMonth(),d.getDate())};
+const dpMax=()=>dpAdd(dpToday(),730);
+const dpMin=id=>{const ci=$("#ci").value,tdy=dpToday();return id==="co"&&ci&&ci>=tdy?dpAdd(ci,1):tdy};
+function dpRefresh(){
+  ["ci","co","evDate"].forEach(id=>{const b=document.getElementById(id);if(!b)return;
+    b.querySelector(".dp-txt").textContent=b.value?new Date(b.value+"T12:00").toLocaleDateString(dpLoc(),{day:"numeric",month:"short",year:"numeric"}):t("f.pick");
+    b.classList.toggle("empty",!b.value)});
+  if(DP.id) dpRender();
+}
+function dpOpen(id){
+  if(DP.id===id){dpClose(true);return}
+  dpClose(false);
+  const b=$("#"+id),min=dpMin(id);
+  let start=b.value||(id==="co"&&$("#ci").value)||min; if(start<min) start=min;
+  DP.id=id;DP.y=+start.slice(0,4);DP.m=+start.slice(5,7)-1;
+  const cal=document.createElement("div");
+  cal.className="cal";cal.id="cal";cal.setAttribute("role","dialog");cal.setAttribute("aria-label",`${t("dp.cal")}: ${t(id==="ci"?"f.ci":"f.co")}`);
+  b.parentNode.appendChild(cal);DP.cal=cal;
+  b.setAttribute("aria-expanded","true");
+  dpRender();
+  /* keep the calendar inside the screen */
+  const r=cal.getBoundingClientRect(),over=r.right-(document.documentElement.clientWidth-12);
+  if(over>0) cal.style.left=`${-over}px`;
+  (cal.querySelector(".cal-day.sel")||cal.querySelector(".cal-day:not(:disabled)"))?.focus({preventScroll:true});
+  const cr=cal.getBoundingClientRect(); if(cr.bottom>innerHeight) window.scrollBy({top:cr.bottom-innerHeight+16,behavior:"smooth"});
+}
+function dpClose(focusBack){
+  if(!DP.id) return; const b=$("#"+DP.id);
+  DP.cal?.remove();DP.cal=null;b.setAttribute("aria-expanded","false");
+  if(focusBack) b.focus({preventScroll:true});
+  DP.id=null;
+}
+function dpRender(){
+  const {id,y,m,cal}=DP; if(!cal) return;
+  const loc=dpLoc(),min=dpMin(id),max=dpMax(),val=$("#"+id).value,ci=$("#ci").value,co=$("#co").value,tdy=dpToday();
+  const title=new Date(y,m,1,12).toLocaleDateString(loc,{month:"long",year:"numeric"});
+  const first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate();
+  const wd=[...Array(7)].map((_,i)=>`<span class="cal-wd" aria-hidden="true">${new Date(2024,0,1+i,12).toLocaleDateString(loc,{weekday:"narrow"})}</span>`).join("");
+  let cells="";for(let i=0;i<first;i++)cells+=`<span></span>`;
+  for(let d=1;d<=days;d++){
+    const s=dpISO(y,m,d),cls=["cal-day"];
+    if(s===tdy)cls.push("today");
+    if(s===val)cls.push("sel");
+    if(id==="co"&&s===ci)cls.push("arr");
+    if(id==="co"&&ci&&co&&s>ci&&s<co)cls.push("range");
+    const off=s<min||s>max;
+    const label=new Date(s+"T12:00").toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    cells+=`<button type="button" class="${cls.join(" ")}" data-d="${s}" aria-label="${label}${s===ci&&id==="co"?" · "+t("dp.arr"):""}"${s===val?' aria-pressed="true"':""}${off?" disabled":""}>${d}</button>`;
+  }
+  const prevOff=dpISO(y,m,1)<=min.slice(0,8)+"01", nextOff=dpISO(y,m,1)>=max.slice(0,8)+"01";
+  const legend=id==="co"&&ci?`<p class="cal-legend"><i aria-hidden="true"></i>${t("dp.arr")}: ${new Date(ci+"T12:00").toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"})}</p>`:"";
+  cal.innerHTML=`<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" aria-label="${t("dp.prev")}"${prevOff?" disabled":""}>‹</button><span class="cal-title" aria-live="polite">${title}</span><button type="button" class="cal-nav" data-nav="1" aria-label="${t("dp.next")}"${nextOff?" disabled":""}>›</button></div><div class="cal-grid">${wd}${cells}</div>${legend}`;
+}
+function dpMove(n){const d=new Date(DP.y,DP.m+n,1);DP.y=d.getFullYear();DP.m=d.getMonth();dpRender()}
+function dpPick(s){
+  const id=DP.id,b=$("#"+id);b.value=s;b.removeAttribute("aria-invalid");
+  if(id==="ci"){const co=$("#co");if(co.value&&co.value<=s)co.value="";}
+  dpRefresh();dpClose(true);
+}
+["ci","co","evDate"].forEach(id=>$("#"+id).addEventListener("click",()=>dpOpen(id)));
+document.addEventListener("click",e=>{
+  if(!DP.cal) return;
+  const nav=e.target.closest(".cal-nav");if(nav&&DP.cal.contains(nav)){dpMove(+nav.dataset.nav);return}
+  const day=e.target.closest(".cal-day");if(day&&DP.cal.contains(day)){if(!day.disabled)dpPick(day.dataset.d);return}
+  if(!DP.cal.contains(e.target)&&!e.target.closest(".dpick")) dpClose(false);
+});
+/* soft preview of the stay while choosing departure */
+document.addEventListener("pointerover",e=>{
+  if(DP.id!=="co"||!DP.cal) return; const ci=$("#ci").value; const day=e.target.closest(".cal-day"); if(!ci||!day||!DP.cal.contains(day))return;
+  const h=day.disabled?null:day.dataset.d;
+  DP.cal.querySelectorAll(".cal-day").forEach(x=>x.classList.toggle("hov",!!h&&x.dataset.d>ci&&x.dataset.d<h));
+});
+document.addEventListener("keydown",e=>{
+  if(!DP.cal) return;
+  if(e.key==="Escape"){e.preventDefault();dpClose(true);return}
+  const day=e.target.closest?.(".cal-day"); if(!day||!DP.cal.contains(day)) return;
+  const step={ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[e.key]; if(!step) return;
+  e.preventDefault();
+  const s=dpAdd(day.dataset.d,step);
+  if(s<dpMin(DP.id)||s>dpMax()) return;
+  const y=+s.slice(0,4),m=+s.slice(5,7)-1; if(y!==DP.y||m!==DP.m){DP.y=y;DP.m=m;dpRender()}
+  DP.cal.querySelector(`[data-d="${s}"]`)?.focus();
+});
+
 const money=(v,cur)=>new Intl.NumberFormat(lang==="en"?"en-GB":"el-GR",{style:"currency",currency:cur||"EUR"}).format(v);
 
 /* κλήσεις στον Worker (ίδιο domain με το site, /api/...) */
@@ -771,12 +939,13 @@ function renderDone(){
 /* Βήμα 1 → 2: διαθεσιμότητα + τιμή δωματίου από το Hosthub */
 $("#f1").addEventListener("submit",async e=>{
   e.preventDefault();const ci=$("#ci").value,co=$("#co").value,g=+$("#guests").value,r=ROOMS.find(x=>x.id===$("#room").value);
-  $("#e1").textContent="";
-  if(!ci||!co) return $("#e1").textContent=t("e.dates");
-  if(ci<iso(today)) return $("#e1").textContent=t("e.past");
+  clearErr("#e1");
+  if(!ci) return fail("#e1",t("e.dates"),"#ci");
+  if(!co) return fail("#e1",t("e.dates"),"#co");
+  if(ci<iso(today)) return fail("#e1",t("e.past"),"#ci");
   const n=Math.round((new Date(co)-new Date(ci))/864e5);
-  if(n<1) return $("#e1").textContent=t("e.min");
-  if(g>r.cap) return $("#e1").textContent=t("e.cap")(R(r).name,r.cap);
+  if(n<1) return fail("#e1",t("e.min"),"#co");
+  if(g>r.cap) return fail("#e1",t("e.cap")(R(r).name,r.cap),"#guests");
 
   const btn=$("#f1 [type=submit]");
   busy(btn,true,t("a.checking"));
@@ -792,12 +961,13 @@ $("#f1").addEventListener("submit",async e=>{
 
 /* Βήμα 2 → 3: στοιχεία + πρωινό, τελική τιμή από τον Worker */
 $("#f2").addEventListener("submit",async e=>{
-  e.preventDefault();$("#e2").textContent="";
+  e.preventDefault();clearErr("#e2");
   const fn=$("#fn").value.trim(),ln=$("#ln").value.trim(),em=$("#em").value.trim(),p=fullPhone(),bf=$("#bf").checked;
-  if(!fn||!ln) return $("#e2").textContent=t("e.name");
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return $("#e2").textContent=t("e.email");
-  if(!p) return $("#e2").textContent=t(dial()==="30"?"e.phoneGR":"e.phone");
-  if(!$("#ok").checked) return $("#e2").textContent=t("e.ok");
+  if(!fn) return fail("#e2",t("e.name"),"#fn");
+  if(!ln) return fail("#e2",t("e.name"),"#ln");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return fail("#e2",t("e.email"),"#em");
+  if(!p) return fail("#e2",t(dial()==="30"?"e.phoneGR":"e.phone"),"#ph");
+  if(!$("#ok").checked) return fail("#e2",t("e.ok"),"#ok");
 
   const btn=$("#f2 [type=submit]");
   busy(btn,true,t("a.checking"));
@@ -900,7 +1070,7 @@ $("#again").onclick=()=>newBooking();
 $("#fe").addEventListener("submit",e=>{
   e.preventDefault();const c=$("#evContact").value.trim();
   $("#eE").classList.remove("ok");
-  if(!c){$("#eE").textContent=t("eq.empty");return}
+  if(!c){fail("#eE",t("eq.empty"),"#evContact");return}
   const type=$("#evType").selectedOptions[0].textContent;
   $("#eE").classList.add("ok");$("#eE").textContent=t("eq.ok")(type,c);
 });
@@ -927,6 +1097,7 @@ function loadIG(){
       const cap=(p.prunedCaption||p.caption||"").slice(0,120);
       return `<a class="ig-item" href="${attr(p.permalink||"https://www.instagram.com/giardino.drama/")}" target="_blank" rel="noopener"><img src="${attr(src)}" alt="${attr(cap||t("ig.post"))}" loading="lazy"></a>`;
     }).join("");
+    revealAdd([...g.querySelectorAll(".ig-item")]);
   }).catch(()=>{g.innerHTML=""});
 }
 
@@ -1038,6 +1209,30 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-terms]");i
 
 /* start */
 setLang(lang);
+
+/* intro screen: soft green cover with the pulsing mark; lifts up on the first move/touch/scroll/key or after a few seconds */
+(function(){
+  const el=$("#intro"),root=document.documentElement;
+  if(!el||!root.classList.contains("intro-on")){el?.remove();return}
+  try{sessionStorage.setItem("gi-intro","1")}catch(_){}
+  const t0=performance.now(),EVENTS=["pointermove","pointerdown","touchstart","wheel","keydown","scroll"];
+  let gone=false;
+  function leave(){
+    if(gone) return;
+    const wait=Math.max(0,700-(performance.now()-t0));   /* let it be seen for a moment */
+    if(wait){setTimeout(leave,wait);return}
+    gone=true;EVENTS.forEach(ev=>removeEventListener(ev,leave,true));
+    el.classList.add("out");root.classList.remove("intro-lock");
+    /* the page's rise-in effects played under the cover: replay them as it lifts */
+    const v=document.querySelector(".view:not([hidden])")?.id.replace("v-","");
+    if(v){RV.tab=null;FAQ_FX.tab=null;revealArm(v);faqArm(v)}
+    const done=()=>{el.remove();root.classList.remove("intro-on")};
+    el.addEventListener("transitionend",done,{once:true});setTimeout(done,1400);
+  }
+  root.classList.add("intro-lock");
+  EVENTS.forEach(ev=>addEventListener(ev,leave,{capture:true,passive:true}));
+  setTimeout(leave,3200);
+})();
 loadIG();
 show((location.hash||"#home").slice(1),false);
 </script>
