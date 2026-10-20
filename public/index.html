@@ -53,7 +53,7 @@ try{if(!sessionStorage.getItem("gi-intro"))document.documentElement.classList.ad
 <!-- HOME -->
 <div class="view" id="v-home">
   <div class="hero-bg">
-  <img class="wm" src="img/mark.png" alt="">
+  <img class="hero-photo" src="img/hero.jpg" alt="" data-i18n-attr="alt:hero.photoAlt">
   <div class="wrap">
     <div class="hero">
       <div class="hero-card">
@@ -321,7 +321,7 @@ el:{
   "brand.aria":"Giardino, αρχική","lang.aria":"Γλώσσα",
   "nav.menu":"Μενού","nav.aria":"Κύριο μενού",
   "nav.home":"Αρχική","nav.rooms":"Δωμάτια","nav.avail":"Διαθεσιμότητα","nav.bar":"Καφέ &amp; Μπαρ","nav.tour":"Τουρισμός στη Δράμα",
-  "hero.eyebrow":"Δράμα · Ευξείνου Πόντου 22","hero.cta1":"Έλεγχος διαθεσιμότητας","hero.cta2":"Δείτε τα δωμάτια",
+  "hero.eyebrow":"Δράμα · Ευξείνου Πόντου 22","hero.photoAlt":"Η αυλή του Giardino το βράδυ, με κόσμο κάτω από το μεγάλο δέντρο","hero.cta1":"Έλεγχος διαθεσιμότητας","hero.cta2":"Δείτε τα δωμάτια",
   "home.eyebrow":"Στο Giardino",
   "ig.h2":"Ακολουθήστε μας","ig.btn":"Ακολουθήστε μας στο Instagram ↗","ig.post":"Ανάρτηση στο Instagram",
   "tile.1h":"Δωμάτια","tile.1p":"Δωμάτια με ησυχία, άνεση και όλα όσα χρειάζεστε για σύντομη ή μεγαλύτερη διαμονή.","tile.1go":"Τα δωμάτια →",
@@ -409,7 +409,7 @@ en:{
   "brand.aria":"Giardino, home","lang.aria":"Language",
   "nav.menu":"Menu","nav.aria":"Main menu",
   "nav.home":"Home","nav.rooms":"Rooms","nav.avail":"Check Availability","nav.bar":"Coffee &amp; Bar","nav.tour":"Tourism in Drama",
-  "hero.eyebrow":"Drama · 22 Efxeinou Pontou","hero.cta1":"Check availability","hero.cta2":"See the rooms",
+  "hero.eyebrow":"Drama · 22 Efxeinou Pontou","hero.photoAlt":"Giardino's courtyard at night, with guests under the big tree","hero.cta1":"Check availability","hero.cta2":"See the rooms",
   "home.eyebrow":"At Giardino",
   "ig.h2":"Follow us","ig.btn":"Follow us on Instagram ↗","ig.post":"Instagram post",
   "tile.1h":"Rooms","tile.1p":"Quiet, comfortable rooms with everything you need for a short or longer stay.","tile.1go":"The rooms →",
@@ -1222,11 +1222,11 @@ setLang(lang);
     const wait=Math.max(0,700-(performance.now()-t0));   /* let it be seen for a moment */
     if(wait){setTimeout(leave,wait);return}
     gone=true;EVENTS.forEach(ev=>removeEventListener(ev,leave,true));
-    el.classList.add("out");root.classList.remove("intro-lock");
+    el.classList.add("out");
     /* the page's rise-in effects played under the cover: replay them as it lifts */
     const v=document.querySelector(".view:not([hidden])")?.id.replace("v-","");
     if(v){RV.tab=null;FAQ_FX.tab=null;revealArm(v);faqArm(v)}
-    const done=()=>{el.remove();root.classList.remove("intro-on")};
+    const done=()=>{el.remove();root.classList.remove("intro-on","intro-lock")};
     el.addEventListener("transitionend",done,{once:true});setTimeout(done,1400);
   }
   root.classList.add("intro-lock");
