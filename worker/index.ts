@@ -5,8 +5,10 @@
 //
 // Endpoints:
 //   GET  /api/rooms/:slug/calendar?from=2026-11-01&to=2026-12-31   τιμές + διαθεσιμότητα (από cache)
-//   POST /api/quote  { slug, checkIn, checkOut }                   τελική τιμή με ζωντανό έλεγχο
-//   POST /api/book   { slug, checkIn, checkOut, adults, guest:{name,email,phone}, country?, notes?, turnstileToken }
+//   POST /api/quote  { slug, checkIn, checkOut, adults, breakfast? }  τιμή (δωμάτιο + πρωινό + προκαταβολή) με ζωντανό έλεγχο
+//   POST /api/verify/send   { email }         στέλνει 8ψήφιο κωδικό (⚠️ προσωρινά: σταθερός 11111111, χωρίς email)
+//   POST /api/verify/check  { email, code }   ελέγχει τον κωδικό
+//   POST /api/book   { slug, checkIn, checkOut, adults, breakfast?, guest:{name,email,phone}, country?, notes?, verifyCode, turnstileToken }
 //
 // Cron (κάθε 10'): τραβάει τιμές + κρατήσεις από Hosthub → ένα JSON στο KV.
 
@@ -64,7 +66,7 @@ const F = {
   rateNoDepart: (r: any): boolean => r.block_departure === true,
   rateExtraPP:  (r: any): number => Number(r.extra_cost_per_person?.cents ?? 0) / 100,
   ratePPLimit:  (r: any): number => Number(r.amount_of_people_threshold ?? 0),
-  newBooking: (room: Room, b: BookingInput, total: number, currency: string) => ({
+  newBooking: (room: Room, b: BookingInput, p: Pricing) => ({
     type: "Booking",
     date_from: b.checkIn,
     date_to: b.checkOut,
@@ -72,15 +74,9 @@ const F = {
     guest_email: b.guest.email,
     guest_phone: b.guest.phone,
     guest_adults: b.adults,
-    booking_value: { cents: Math.round(total * 100), currency },
-    // χώρα + παρατηρήσεις του πελάτη από τη φόρμα → σημειώσεις της κράτησης στο Hosthub
-    ...(() => {
-      const notes = [
-        b.country?.trim() && `Χώρα: ${b.country.trim()}`,
-        b.notes?.trim() && `Σημειώσεις: ${b.notes.trim()}`,
-      ].filter(Boolean).join("\n");
-      return notes ? { notes } : {};
-    })(),
+    booking_value: { cents: Math.round(p.total * 100), currency: p.currency },
+    // χώρα, πρωινό, τιμές, προκαταβολή και παρατηρήσεις του πελάτη → σημειώσεις της κράτησης στο Hosthub
+    notes: bookingNotes(b, p),
   }),
 };
 // ─────────────────────────────────────────────────────────────
@@ -224,11 +220,63 @@ async function quote(env: Env, room: Room, checkIn: string, checkOut: string, ad
   return { ok: true, nights: list.length, total, currency: snap.currency, perNight: perNight as any };
 }
 
+// ---------- τιμολόγηση: πρωινό + προκαταβολή ----------
+const BREAKFAST_PP = 9;          // € ανά άτομο ανά νύχτα — ΙΔΙΟ με το BREAKFAST_PP στο index.html
+const DEPOSIT_RATE = 0.3;        // 30% του συνόλου
+const DEPOSIT_AFTER_DAYS = 5;    // προκαταβολή όταν η άφιξη απέχει περισσότερες από 5 ημέρες
+const athensToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Athens" }).format(new Date()); // YYYY-MM-DD
+const daysBetween = (a: string, b: string) => Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 864e5);
+const r2 = (x: number) => Math.round(x * 100) / 100;
+
+type QuoteOk = Extract<QuoteResult, { ok: true }>;
+type Pricing = { nights: number; room: number; breakfast: number; total: number; deposit: number; currency: string };
+
+function pricing(q: QuoteOk, adults: number, breakfast: boolean, checkIn: string): Pricing {
+  const bf = breakfast ? adults * q.nights * BREAKFAST_PP : 0;
+  const total = r2(q.total + bf);
+  const deposit = daysBetween(athensToday(), checkIn) > DEPOSIT_AFTER_DAYS
+    ? Math.round((total * DEPOSIT_RATE) / 10) * 10          // στρογγυλοποίηση στην πλησιέστερη δεκάδα
+    : 0;
+  return { nights: q.nights, room: q.total, breakfast: bf, total, deposit, currency: q.currency };
+}
+
+const money = (x: number, c: string) => `${Number.isInteger(x) ? x : x.toFixed(2)} ${c === "EUR" ? "€" : c}`;
+
+function bookingNotes(b: BookingInput, p: Pricing) {
+  const c = p.currency;
+  return [
+    b.country?.trim() && `Χώρα: ${b.country.trim()}`,
+    p.breakfast
+      ? `Πρωινό: Ναι – ${b.adults} άτομα × ${p.nights} νύχτες × ${money(BREAKFAST_PP, c)} = ${money(p.breakfast, c)}`
+      : "Πρωινό: Όχι",
+    `Τιμή δωματίου: ${money(p.room, c)}`,
+    `Τελική τιμή: ${money(p.total, c)}`,
+    p.deposit ? `Προκαταβολή 30%: ${money(p.deposit, c)} (εκκρεμεί)` : "Προκαταβολή: δεν απαιτείται",
+    b.notes?.trim() && `Σημειώσεις πελάτη: ${b.notes.trim()}`,
+  ].filter(Boolean).join("\n");
+}
+
+// ---------- επαλήθευση email ----------
+// ⚠️ ΠΡΟΣΩΡΙΝΟ: σταθερός κωδικός 11111111 και καμία αποστολή email.
+// Όταν στήσουμε την αποστολή: τυχαίος κωδικός, αποθήκευση με λήξη (π.χ. 10'), όριο προσπαθειών, email μέσω Resend.
+// Αλλάζουν ΜΟΝΟ οι δύο συναρτήσεις παρακάτω — το site και το /api/book μένουν ίδια.
+const TEST_CODE = "11111111";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function sendVerifyCode(_env: Env, _email: string, _lang?: string): Promise<void> {
+  // TODO: δημιουργία κωδικού + αποστολή email
+}
+
+async function isCodeValid(_env: Env, _email: string, code: unknown): Promise<boolean> {
+  return typeof code === "string" && /^\d{8}$/.test(code) && code === TEST_CODE;
+}
+
 // ---------- κράτηση ----------
 interface BookingInput {
   slug: string; checkIn: string; checkOut: string; adults: number; lang?: "el" | "en";
-  notes?: string; country?: string;
-  guest: { name: string; email: string; phone: string }; turnstileToken: string;
+  breakfast?: boolean; notes?: string; country?: string;
+  guest: { name: string; email: string; phone: string };
+  verifyCode: string; turnstileToken: string;
 }
 
 async function verifyTurnstile(env: Env, token: string, ip: string | null) {
@@ -248,9 +296,11 @@ async function verifyTurnstile(env: Env, token: string, ip: string | null) {
 function validateGuest(b: BookingInput, room: Room): string | null {
   const g = b.guest ?? ({} as any);
   if (!g.name || g.name.trim().length < 2 || g.name.length > 100) return "invalid_name";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email ?? "") || g.email.length > 200) return "invalid_email";
-  const digits = String(g.phone ?? "").replace(/\D/g, "");
-  if (digits.length < 10 || digits.length > 15 || String(g.phone).length > 30) return "invalid_phone";
+  if (!EMAIL_RE.test(g.email ?? "") || g.email.length > 200) return "invalid_email";
+  // τηλέφωνο με κωδικό χώρας, π.χ. +306912345678 (ελληνικό: +30 και 10 ψηφία)
+  const phone = String(g.phone ?? "").replace(/[\s-]/g, "");
+  if (!/^\+\d{8,15}$/.test(phone) || (phone.startsWith("+30") && phone.length !== 13)) return "invalid_phone";
+  g.phone = phone;
   if (!Number.isInteger(b.adults) || b.adults < 1 || b.adults > room.maxGuests) return "invalid_guests";
   if (b.notes && String(b.notes).length > 1000) return "notes_too_long";
   if (b.country && String(b.country).length > 60) return "bad_request";
@@ -264,23 +314,27 @@ async function book(env: Env, ctx: ExecutionContext, req: Request, b: BookingInp
   const invalid = validateGuest(b, room);
   if (invalid) return json({ ok: false, reason: invalid }, 400);
 
+  if (!(await isCodeValid(env, b.guest.email, b.verifyCode)))
+    return json({ ok: false, reason: "invalid_code" }, 400);
+
   if (!(await verifyTurnstile(env, b.turnstileToken, req.headers.get("CF-Connecting-IP"))))
     return json({ ok: false, reason: "captcha_failed" }, 403);
 
   // τιμή υπολογίζεται ΜΟΝΟ στον server
   const q = await quote(env, room, b.checkIn, b.checkOut, b.adults);
   if (!q.ok) return json(q, 409);
+  const p = pricing(q, b.adults, b.breakfast === true, b.checkIn);
 
   const created = await hh(env, `/rentals/${room.rentalId}/calendar-events`, {
     method: "POST",
-    body: JSON.stringify(F.newBooking(room, b, q.total, q.currency)),
+    body: JSON.stringify(F.newBooking(room, b, p)),
   });
 
   // κλείνουμε αμέσως τις μέρες στην cache, για να μη τις δει διαθέσιμες άλλος
   ctx.waitUntil(markBlocked(env, room.slug, b.checkIn, b.checkOut));
-  ctx.waitUntil(sendEmails(env, room, b, q.total, q.currency));
+  ctx.waitUntil(sendEmails(env, room, b, p));
 
-  return json({ ok: true, bookingId: created?.id ?? null, total: q.total, currency: q.currency });
+  return json({ ok: true, bookingId: created?.id ?? null, ...p });
 }
 
 async function markBlocked(env: Env, slug: string, from: string, to: string) {
@@ -290,11 +344,17 @@ async function markBlocked(env: Env, slug: string, from: string, to: string) {
   await env.CACHE.put(SNAPSHOT_KEY, JSON.stringify(snap));
 }
 
-async function sendEmails(env: Env, room: Room, b: BookingInput, total: number, currency: string) {
+async function sendEmails(env: Env, room: Room, b: BookingInput, p: Pricing) {
   if (!env.RESEND_API_KEY || !env.MAIL_FROM) return;
   const el = b.lang !== "en";
   const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
-  const summary = `${esc(room.name)}: ${b.checkIn} → ${b.checkOut}, ${b.adults} ${el ? "άτομα" : "guests"}, ${total} ${currency}`;
+  const summary = `${esc(room.name)}: ${b.checkIn} → ${b.checkOut}, ${b.adults} ${el ? "άτομα" : "guests"}` +
+    `${p.breakfast ? (el ? ", με πρωινό" : ", with breakfast") : ""}, ${el ? "σύνολο" : "total"} ${money(p.total, p.currency)}`;
+  const deposit = p.deposit
+    ? `<p>${el
+        ? `Απαιτείται προκαταβολή ${money(p.deposit, p.currency)}. Θα λάβετε ξεχωριστό email με οδηγίες. Οι ημερομηνίες δεσμεύονται μόνο αφού κατατεθεί η προκαταβολή.`
+        : `A deposit of ${money(p.deposit, p.currency)} is required. You'll receive a separate email with instructions. Your dates are secured only once the deposit has been paid.`}</p>`
+    : "";
   const send = (to: string, subject: string, html: string) =>
     fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -305,12 +365,12 @@ async function sendEmails(env: Env, room: Room, b: BookingInput, total: number, 
   const jobs = [
     send(b.guest.email,
       el ? "Η κράτησή σας στο Giardino" : "Your booking at Giardino",
-      `<p>${el ? "Ευχαριστούμε" : "Thank you"}, ${esc(b.guest.name)}!</p><p>${summary}</p>`),
+      `<p>${el ? "Ευχαριστούμε" : "Thank you"}, ${esc(b.guest.name)}!</p><p>${summary}</p>${deposit}`),
   ];
   if (env.NOTIFY_EMAIL)
     jobs.push(send(env.NOTIFY_EMAIL, `Νέα κράτηση από το site – ${esc(b.guest.name)}`,
       `<p>${summary}</p><p>${esc(b.guest.email)} · ${esc(b.guest.phone)}</p>` +
-      `<p>${esc([b.country, b.notes].filter(Boolean).join(" · "))}</p>`));
+      `<p>${esc(bookingNotes(b, p)).replace(/\n/g, "<br>")}</p>`));
   await Promise.allSettled(jobs);
 }
 
@@ -349,7 +409,24 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
     const room = findRoom(env, b.slug);
     if (!room) return json({ ok: false, reason: "unknown_room" }, 400);
     const adults = Number.isInteger(b.adults) ? Math.min(Math.max(b.adults, 1), room.maxGuests) : 1;
-    return json(await quote(env, room, b.checkIn, b.checkOut, adults));
+    const q = await quote(env, room, b.checkIn, b.checkOut, adults);
+    if (!q.ok) return json(q);
+    return json({ ok: true, ...pricing(q, adults, b.breakfast === true, b.checkIn) });
+  }
+
+  if (p === "/api/verify/send" && req.method === "POST") {
+    const b: any = await req.json().catch(() => ({}));
+    const email = String(b.email ?? "").trim();
+    if (!EMAIL_RE.test(email) || email.length > 200) return json({ ok: false, reason: "invalid_email" }, 400);
+    await sendVerifyCode(env, email, b.lang);
+    return json({ ok: true });
+  }
+
+  if (p === "/api/verify/check" && req.method === "POST") {
+    const b: any = await req.json().catch(() => ({}));
+    if (!(await isCodeValid(env, String(b.email ?? "").trim(), b.code)))
+      return json({ ok: false, reason: "invalid_code" }, 400);
+    return json({ ok: true });
   }
 
   if (p === "/api/book" && req.method === "POST") {

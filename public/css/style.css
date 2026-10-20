@@ -8,6 +8,8 @@
   --cream:#E9E4D7;     /* the "g" */
   --wine:#6E7556;      /* accent: deep sage */
   --on-accent:#FFFFFF;
+  --error:#A3372A;     /* λάθος κωδικός */
+  --error-soft:#FBEDEA;
   --display:"GFS Didot","Didot","Bodoni 72",Georgia,serif;
   --body:"Commissioner","Segoe UI",system-ui,sans-serif;
   --r:14px; --max:1120px; color-scheme:light;
@@ -134,7 +136,7 @@ main section{padding-block:64px}
 .step{font-size:.8rem;padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .step.on{background:var(--leaf);border-color:var(--leaf);color:var(--on-accent)}
 .step.done{border-color:var(--leaf);color:var(--leaf)}
-button.step{font:inherit;font-size:.8rem;background:none;line-height:inherit;cursor:default}
+button.step{font-family:inherit;background:none;line-height:inherit;cursor:default;white-space:nowrap}
 button.step:not(:disabled){cursor:pointer}
 button.step.done:not(:disabled):hover{background:var(--leaf-soft)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -146,6 +148,7 @@ textarea{min-height:90px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--leaf);outline-offset:0;border-color:var(--leaf)}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:.85rem;color:var(--muted)}
 .check input{width:auto;margin-top:4px}
+.check.field{flex-direction:row}
 .err{color:var(--wine);font-size:.88rem;min-height:1.2em;margin-top:12px}
 .result{margin-top:20px;border-radius:12px;padding:18px;background:var(--leaf-soft);display:flex;flex-direction:column;gap:6px}
 .result b{font-family:var(--display);font-weight:400;font-size:1.3rem}
@@ -320,8 +323,46 @@ body.lb-open{overflow:hidden}
 /* booking: price, loading, captcha */
 .result .price{margin-top:4px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--sage) 45%,transparent);font-size:.95rem}
 .result .price strong{font-family:var(--display);font-weight:400;font-size:1.35rem;color:var(--ink);font-variant-numeric:tabular-nums}
-.btn[disabled]{opacity:.65;cursor:progress}
+.btn[disabled]{opacity:.65;cursor:not-allowed}
+.btn[data-busy]{cursor:progress}
 .captcha{min-height:65px}
 .captcha:empty{min-height:0}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* booking: steps 2–5 */
+.step-title{font-size:1.35rem;margin-bottom:14px}
+.step-title:focus{outline:none}
+.phone{display:grid;grid-template-columns:minmax(0,11.5rem) minmax(0,1fr);gap:8px}
+.phone select{font-variant-numeric:tabular-nums;font-weight:500}
+.hint{font-size:.78rem;color:var(--muted);line-height:1.45}
+.breakfast{padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--leaf-soft);gap:6px}
+.breakfast .check{color:var(--ink);font-size:.92rem}
+.bf-price{color:var(--muted);font-weight:400}
+.bf-live{font-size:.88rem;color:var(--leaf);font-weight:600;font-variant-numeric:tabular-nums;padding-left:26px}
+.bf-live:empty{display:none}
+.stay{color:var(--muted);font-size:.92rem;margin:4px 0 14px}
+.price-rows{display:grid;grid-template-columns:1fr auto;gap:10px 18px;margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:12px;font-variant-numeric:tabular-nums;font-size:.94rem}
+.price-rows dt{color:var(--muted)}
+.price-rows dd{margin:0;text-align:right;white-space:nowrap}
+.price-rows .tot{padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-weight:600;align-self:end}
+.price-rows dd.tot{font-family:var(--display);font-weight:400;font-size:1.45rem;line-height:1.1}
+.note{margin:16px 0;padding:14px 16px;border-left:3px solid var(--wine);background:var(--cream);border-radius:0 10px 10px 0;font-size:.9rem;display:flex;flex-direction:column;gap:6px}
+.note[hidden]{display:none}
+.note strong{font-variant-numeric:tabular-nums}
+#s3 .btn-row,#s4 .btn-row{margin-top:18px}
+.v-text{color:var(--muted);margin-bottom:16px}
+.verify{display:flex;flex-direction:column;gap:14px;align-items:flex-start;margin-bottom:18px}
+.verify .field{width:100%}
+.code-row{display:flex;gap:8px;flex-wrap:wrap}
+.code-row input{flex:1 1 11rem;max-width:16rem;font-size:1.15rem;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
+.code-row input:disabled{opacity:.75}
+.code-row input.bad{border-color:var(--error);background:var(--error-soft);outline-color:var(--error)}
+.code-row input.good{border-color:var(--leaf);background:var(--leaf-soft);opacity:1}
+.v-status{font-size:.9rem;min-height:1.4em;color:var(--muted)}
+.v-status.good{color:var(--leaf);font-weight:600}
+.v-status.bad{color:var(--error);font-weight:500}
+@media (max-width:640px){
+  .phone{grid-template-columns:minmax(0,9.5rem) minmax(0,1fr)}
+  .code-row input{max-width:none}
+  .price-rows{padding:14px}
+}
