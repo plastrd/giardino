@@ -6,8 +6,9 @@
 // Endpoints:
 //   GET  /api/rooms/:slug/calendar?from=2026-11-01&to=2026-12-31   τιμές + διαθεσιμότητα (από cache)
 //   POST /api/quote  { slug, checkIn, checkOut, adults, breakfast? }  τιμή (δωμάτιο + πρωινό + προκαταβολή) με ζωντανό έλεγχο
-//   POST /api/verify/send   { email }         στέλνει 8ψήφιο κωδικό (⚠️ προσωρινά: σταθερός 11111111, χωρίς email)
-//   POST /api/verify/check  { email, code }   ελέγχει τον κωδικό
+//   POST /api/verify/send   { email, lang? }  στέλνει νέο τυχαίο 8ψήφιο κωδικό στο email (ακυρώνει τον προηγούμενο)
+//   POST /api/verify/check  { email, code }   ελέγχει τον κωδικό (έως 5 λάθη)
+//   POST /api/verify/reset  { email }         ακυρώνει τον τρέχοντα κωδικό (όταν ο επισκέπτης φεύγει από το βήμα)
 //   POST /api/book   { slug, checkIn, checkOut, adults, breakfast?, guest:{name,email,phone}, country?, notes?, verifyCode, turnstileToken }
 //
 // Cron (κάθε 10'): τραβάει τιμές + κρατήσεις από Hosthub → ένα JSON στο KV.
@@ -257,18 +258,133 @@ function bookingNotes(b: BookingInput, p: Pricing) {
 }
 
 // ---------- επαλήθευση email ----------
-// ⚠️ ΠΡΟΣΩΡΙΝΟ: σταθερός κωδικός 11111111 και καμία αποστολή email.
-// Όταν στήσουμε την αποστολή: τυχαίος κωδικός, αποθήκευση με λήξη (π.χ. 10'), όριο προσπαθειών, email μέσω Resend.
-// Αλλάζουν ΜΟΝΟ οι δύο συναρτήσεις παρακάτω — το site και το /api/book μένουν ίδια.
-const TEST_CODE = "11111111";
+// Τυχαίος 8ψήφιος κωδικός, αποθηκεύεται στο KV μόνο ως hash, με λήξη.
+// • Κάθε νέα αποστολή αντικαθιστά τον προηγούμενο κωδικό → ισχύει μόνο ο τελευταίος.
+// • Επαναποστολή μόνο μετά από 1 λεπτό.
+// • 5 λάθος κωδικοί για το ίδιο email → κλείδωμα του email για 30 λεπτά.
+// • Ο επαληθευμένος κωδικός ισχύει για μία μόνο κράτηση.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OTP_TTL = 15 * 60;           // ο κωδικός ισχύει 15 λεπτά από την αποστολή
+const OTP_VERIFIED_TTL = 30 * 60;  // μετά την επαλήθευση: 30 λεπτά για να ολοκληρωθεί η κράτηση
+const OTP_RESEND_SEC = 60;         // επαναποστολή μετά από 1 λεπτό (το KV δέχεται ελάχιστη λήξη 60")
+const OTP_MAX_FAILS = 5;           // λάθη πριν το κλείδωμα
+const OTP_LOCK_SEC = 30 * 60;      // διάρκεια κλειδώματος
+const OTP_MAX_SENDS = 8;           // αποστολές ανά email ανά ώρα (προστασία από κατάχρηση)
 
-async function sendVerifyCode(_env: Env, _email: string, _lang?: string): Promise<void> {
-  // TODO: δημιουργία κωδικού + αποστολή email
+type OtpRec = { h: string; verified?: boolean };
+type OtpResult = { ok: true } | { ok: false; reason: string; attemptsLeft?: number; retryIn?: number };
+
+const otpKey = (email: string) => `otp:${email}`;
+const coolKey = (email: string) => `otp-cool:${email}`;
+const failKey = (email: string) => `otp-fail:${email}`;
+const sendsKey = (email: string) => `otp-sends:${email}`;
+const normEmail = (e: unknown) => String(e ?? "").trim().toLowerCase();
+
+async function sha256(text: string) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+const otpHash = (email: string, code: string) => sha256(`giardino-otp:${email}:${code}`);
+
+function newCode() {
+  // ομοιόμορφα τυχαίος 00000000–99999999
+  const max = Math.floor(0xffffffff / 1e8) * 1e8;
+  const a = new Uint32Array(1);
+  do crypto.getRandomValues(a); while (a[0] >= max);
+  return String(a[0] % 1e8).padStart(8, "0");
 }
 
-async function isCodeValid(_env: Env, _email: string, code: unknown): Promise<boolean> {
-  return typeof code === "string" && /^\d{8}$/.test(code) && code === TEST_CODE;
+async function getFails(env: Env, email: string) {
+  return Number(await env.CACHE.get(failKey(email))) || 0;
+}
+
+async function sendVerifyCode(env: Env, rawEmail: string, lang?: string): Promise<OtpResult> {
+  const email = normEmail(rawEmail);
+  if ((await getFails(env, email)) >= OTP_MAX_FAILS) return { ok: false, reason: "too_many_attempts" };
+
+  const cool = await env.CACHE.getWithMetadata<{ until: number }>(coolKey(email));
+  const until = cool.metadata?.until ?? 0;
+  if (until > Date.now()) return { ok: false, reason: "too_soon", retryIn: Math.ceil((until - Date.now()) / 1000) };
+
+  const sends = Number(await env.CACHE.get(sendsKey(email))) || 0;
+  if (sends >= OTP_MAX_SENDS) return { ok: false, reason: "too_many_sends" };
+
+  if (!env.RESEND_API_KEY || !env.MAIL_FROM) {
+    console.error("verify: RESEND_API_KEY ή MAIL_FROM λείπει — δεν μπορεί να σταλεί κωδικός");
+    return { ok: false, reason: "email_unavailable" };
+  }
+
+  const code = newCode();
+  const sent = await sendCodeEmail(env, rawEmail.trim(), code, lang === "en" ? "en" : "el");
+  if (!sent) return { ok: false, reason: "email_failed" };
+
+  // ο νέος κωδικός αντικαθιστά τον παλιό
+  await Promise.all([
+    env.CACHE.put(otpKey(email), JSON.stringify({ h: await otpHash(email, code) } satisfies OtpRec), { expirationTtl: OTP_TTL }),
+    env.CACHE.put(coolKey(email), "1", { expirationTtl: OTP_RESEND_SEC, metadata: { until: Date.now() + OTP_RESEND_SEC * 1000 } }),
+    env.CACHE.put(sendsKey(email), String(sends + 1), { expirationTtl: 3600 }),
+  ]);
+  return { ok: true };
+}
+
+async function checkVerifyCode(env: Env, rawEmail: string, code: unknown): Promise<OtpResult> {
+  const email = normEmail(rawEmail);
+  const fails = await getFails(env, email);
+  if (fails >= OTP_MAX_FAILS) return { ok: false, reason: "too_many_attempts" };
+
+  const rec = await env.CACHE.get<OtpRec>(otpKey(email), "json");
+  if (!rec) return { ok: false, reason: "code_expired" };
+
+  if (typeof code === "string" && /^\d{8}$/.test(code) && (await otpHash(email, code)) === rec.h) {
+    if (!rec.verified)
+      await Promise.all([
+        env.CACHE.put(otpKey(email), JSON.stringify({ ...rec, verified: true }), { expirationTtl: OTP_VERIFIED_TTL }),
+        fails ? env.CACHE.delete(failKey(email)) : null,  // σωστός κωδικός → μηδενίζονται τα λάθη
+      ]);
+    return { ok: true };
+  }
+
+  const n = fails + 1;
+  if (n >= OTP_MAX_FAILS) {
+    await Promise.all([
+      env.CACHE.put(failKey(email), String(n), { expirationTtl: OTP_LOCK_SEC }),
+      env.CACHE.delete(otpKey(email)),              // ο κωδικός δεν ισχύει πια
+    ]);
+    return { ok: false, reason: "too_many_attempts" };
+  }
+  await env.CACHE.put(failKey(email), String(n), { expirationTtl: OTP_LOCK_SEC });
+  return { ok: false, reason: "invalid_code", attemptsLeft: OTP_MAX_FAILS - n };
+}
+
+// για την κράτηση: ο κωδικός πρέπει να είναι ο τελευταίος που στάλθηκε ΚΑΙ να έχει επαληθευτεί
+async function isCodeValid(env: Env, rawEmail: string, code: unknown): Promise<boolean> {
+  const email = normEmail(rawEmail);
+  if (typeof code !== "string" || !/^\d{8}$/.test(code)) return false;
+  const rec = await env.CACHE.get<OtpRec>(otpKey(email), "json");
+  return !!rec?.verified && (await otpHash(email, code)) === rec.h;
+}
+const useCode = (env: Env, rawEmail: string) => env.CACHE.delete(otpKey(normEmail(rawEmail)));
+
+// Email με τον κωδικό — προσωρινή απλή μορφή· το σχέδιο του email θα γίνει αργότερα (αλλάζει μόνο αυτή η συνάρτηση).
+async function sendCodeEmail(env: Env, to: string, code: string, lang: "el" | "en"): Promise<boolean> {
+  const el = lang === "el";
+  const subject = el ? `Κωδικός επαλήθευσης: ${code}` : `Verification code: ${code}`;
+  const html =
+    `<p>${el ? "Ο κωδικός επαλήθευσης για την κράτησή σας στο Giardino είναι:" : "Your verification code for your booking at Giardino is:"}</p>` +
+    `<p style="font-size:28px;letter-spacing:6px;font-weight:bold">${code}</p>` +
+    `<p>${el ? "Ισχύει για 15 λεπτά. Αν δεν ζητήσατε εσείς κωδικό, αγνοήστε αυτό το μήνυμα." : "It is valid for 15 minutes. If you didn't request a code, you can ignore this email."}</p>`;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: env.MAIL_FROM, to, subject, html }),
+    });
+    if (!r.ok) console.error("verify email failed", r.status, (await r.text()).slice(0, 300));
+    return r.ok;
+  } catch (e) {
+    console.error("verify email unreachable", e);
+    return false;
+  }
 }
 
 // ---------- κράτηση ----------
@@ -332,6 +448,7 @@ async function book(env: Env, ctx: ExecutionContext, req: Request, b: BookingInp
 
   // κλείνουμε αμέσως τις μέρες στην cache, για να μη τις δει διαθέσιμες άλλος
   ctx.waitUntil(markBlocked(env, room.slug, b.checkIn, b.checkOut));
+  ctx.waitUntil(useCode(env, b.guest.email));        // ο κωδικός ισχύει για μία κράτηση
   ctx.waitUntil(sendEmails(env, room, b, p));
 
   return json({ ok: true, bookingId: created?.id ?? null, ...p });
@@ -418,14 +535,22 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
     const b: any = await req.json().catch(() => ({}));
     const email = String(b.email ?? "").trim();
     if (!EMAIL_RE.test(email) || email.length > 200) return json({ ok: false, reason: "invalid_email" }, 400);
-    await sendVerifyCode(env, email, b.lang);
-    return json({ ok: true });
+    const r = await sendVerifyCode(env, email, b.lang);
+    return json(r, r.ok ? 200 : r.reason === "too_soon" || r.reason === "too_many_sends" ? 429 : r.reason === "too_many_attempts" ? 403 : 400);
   }
 
   if (p === "/api/verify/check" && req.method === "POST") {
     const b: any = await req.json().catch(() => ({}));
-    if (!(await isCodeValid(env, String(b.email ?? "").trim(), b.code)))
-      return json({ ok: false, reason: "invalid_code" }, 400);
+    const email = String(b.email ?? "").trim();
+    if (!EMAIL_RE.test(email) || email.length > 200) return json({ ok: false, reason: "invalid_email" }, 400);
+    const r = await checkVerifyCode(env, email, b.code);
+    return json(r, r.ok ? 200 : r.reason === "too_many_attempts" ? 403 : 400);
+  }
+
+  if (p === "/api/verify/reset" && req.method === "POST") {
+    const b: any = await req.json().catch(() => ({}));
+    const email = String(b.email ?? "").trim();
+    if (EMAIL_RE.test(email) && email.length <= 200) await env.CACHE.delete(otpKey(normEmail(email)));
     return json({ ok: true });
   }
 

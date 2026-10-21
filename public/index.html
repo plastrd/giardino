@@ -352,7 +352,7 @@ el:{
   "v.label":"Κωδικός επαλήθευσης (8 ψηφία)","v.check":"Επαλήθευση",
   "v.sent":e=>`Στείλαμε κωδικό στο ${e}. Ελέγξτε και τα ανεπιθύμητα.`,
   "v.ok":"Το email επαληθεύτηκε","v.bad":"Λάθος κωδικός. Ελέγξτε τον και δοκιμάστε ξανά.","v.len":"Ο κωδικός έχει 8 ψηφία.",
-  "v.need":"Επαληθεύστε πρώτα το email σας.","v.expired":"Ο κωδικός δεν ισχύει πια. Στείλτε νέο κωδικό.",
+  "v.need":"Επαληθεύστε πρώτα το email σας.","v.expired":"Ο κωδικός δεν ισχύει πια. Στείλτε νέο κωδικό.","v.left":n=>`Λάθος κωδικός. ${n===1?"Απομένει 1 προσπάθεια.":`Απομένουν ${n} προσπάθειες.`}`,"v.locked":"Αδυναμία επαλήθευσης email. Παρακαλούμε συμπληρώστε ένα έγκυρο email και ξεκινήστε ξανά την κράτηση.","v.soon":"Μόλις στάλθηκε κωδικός σε αυτό το email. Μπορείτε να ζητήσετε νέο σε λίγο.","v.tooMany":"Στάλθηκαν πολλοί κωδικοί σε αυτό το email. Δοκιμάστε ξανά αργότερα ή καλέστε μας στο +30 2521 402133.","v.mailDown":"Δεν ήταν δυνατή η αποστολή του κωδικού αυτή τη στιγμή. Δοκιμάστε ξανά ή καλέστε μας στο +30 2521 402133.",
   "s.bf":"Πρωινό","s.yes":"Ναι","s.no":"Όχι","s.deposit":"Προκαταβολή",
   "done.eyebrow":"Η αίτηση καταχωρήθηκε","done.thanks":"Ευχαριστούμε,","done.note":"Θα λάβετε επιβεβαίωση στο email σας.","done.again":"Νέα κράτηση",
   "dn.title":"Από τον πρώτο καφέ<br>ως το τελευταίο ποτήρι κρασί",
@@ -440,7 +440,7 @@ en:{
   "v.label":"Verification code (8 digits)","v.check":"Verify",
   "v.sent":e=>`We've sent a code to ${e}. Please also check your spam folder.`,
   "v.ok":"Email verified","v.bad":"Wrong code. Please check it and try again.","v.len":"The code has 8 digits.",
-  "v.need":"Please verify your email first.","v.expired":"This code is no longer valid. Please send a new one.",
+  "v.need":"Please verify your email first.","v.expired":"This code is no longer valid. Please send a new one.","v.left":n=>`Wrong code. ${n===1?"1 attempt left.":`${n} attempts left.`}`,"v.locked":"We couldn't verify your email. Please enter a valid email address and start your booking again.","v.soon":"A code was just sent to this email. You can request a new one shortly.","v.tooMany":"Too many codes have been sent to this email. Please try again later or call us on +30 2521 402133.","v.mailDown":"We couldn't send the code right now. Please try again or call us on +30 2521 402133.",
   "s.bf":"Breakfast","s.yes":"Yes","s.no":"No","s.deposit":"Deposit",
   "done.eyebrow":"Request received","done.thanks":"Thank you,","done.note":"You'll receive a confirmation by email.","done.again":"New booking",
   "dn.title":"From the first espresso<br>to the last glass of wine",
@@ -830,7 +830,13 @@ function reasonMsg(r){
     case "invalid_email": return t("e.email");
     case "invalid_phone": return t("e.phone");
     case "captcha_failed":return t("x.captcha_failed");
-    case "invalid_code":  return t("v.bad");
+    case "invalid_code":  return r.attemptsLeft?t("v.left")(r.attemptsLeft):t("v.bad");
+    case "code_expired":  return t("v.expired");
+    case "too_many_attempts": return t("v.locked");
+    case "too_many_sends":return t("v.tooMany");
+    case "too_soon":      return t("v.soon");
+    case "email_unavailable":
+    case "email_failed":  return t("v.mailDown");
     default:              return t("x.server");
   }
 }
@@ -990,6 +996,8 @@ $("#toVerify").onclick=()=>goStep(4);
 const V={sent:false,ok:false,until:0,timer:null};
 function setVStatus(cls,msg){const s=$("#vStatus");s.className="v-status"+(cls?" "+cls:"");s.textContent=msg}
 function resetVerify(){
+  /* ο κωδικός αυτής της επίσκεψης στο βήμα ακυρώνεται και στον server → ισχύει μόνο ο επόμενος που θα σταλεί */
+  if(V.sent&&booking.em) api("/api/verify/reset",{email:booking.em});
   clearInterval(V.timer);Object.assign(V,{sent:false,ok:false,until:0,timer:null});
   const c=$("#vCode");c.value="";c.disabled=true;c.classList.remove("good","bad");c.removeAttribute("aria-invalid");
   $("#vCheck").disabled=true;$("#finish").disabled=true;
@@ -1006,7 +1014,14 @@ function renderSend(){
 $("#vSend").onclick=async()=>{
   const b=$("#vSend");b.disabled=true;b.textContent=t("f.sending");
   const r=await api("/api/verify/send",{email:booking.em,lang});
-  if(!r.ok){renderSend();setVStatus("bad",reasonMsg(r));return}
+  if(!r.ok){
+    if(r.reason==="too_many_attempts") return lockOut();
+    if(r.reason==="too_soon"&&r.retryIn){                                  /* μόλις στάλθηκε: περιμένει ως το 1 λεπτό */
+      V.until=Date.now()+r.retryIn*1000;V.sent=true;
+      clearInterval(V.timer);V.timer=setInterval(renderSend,1000);
+    }
+    renderSend();setVStatus("bad",reasonMsg(r));return;
+  }
   V.sent=true;V.ok=false;V.until=Date.now()+60000;                       /* επαναποστολή μετά από 1 λεπτό */
   clearInterval(V.timer);V.timer=setInterval(renderSend,1000);renderSend();
   const c=$("#vCode");c.disabled=false;c.value="";c.classList.remove("good","bad");c.removeAttribute("aria-invalid");
@@ -1022,13 +1037,22 @@ async function checkCode(){
   busy(btn,true,t("a.checking"));
   const r=await api("/api/verify/check",{email:booking.em,code});
   busy(btn,false);
-  if(!r.ok) return markBad(r.reason==="invalid_code"?t("v.bad"):reasonMsg(r));
+  if(!r.ok){
+    if(r.reason==="too_many_attempts") return lockOut();
+    return markBad(reasonMsg(r));
+  }
   V.ok=true;booking.code=code;clearInterval(V.timer);V.timer=null;
   c.classList.remove("bad");c.classList.add("good");c.removeAttribute("aria-invalid");c.disabled=true;btn.disabled=true;
   renderSend();setVStatus("good",t("v.ok"));
   $("#finish").disabled=false;
 }
 $("#vCheck").onclick=checkCode;
+/* 5 λάθος κωδικοί: μήνυμα και επιστροφή στην αρχή της κράτησης, με το email σημειωμένο για διόρθωση */
+function lockOut(){
+  goStep(1);
+  fail("#e1",t("v.locked"));
+  $("#em").setAttribute("aria-invalid","true");
+}
 $("#vCode").addEventListener("input",e=>{
   const c=e.target;c.value=c.value.replace(/\D/g,"").slice(0,8);
   if(c.classList.contains("bad")){c.classList.remove("bad");c.removeAttribute("aria-invalid");setVStatus("","")}
