@@ -143,7 +143,7 @@ try{if(!sessionStorage.getItem("gi-intro"))document.documentElement.classList.ad
             <div class="field full"><label for="em">Email</label><input id="em" type="email" autocomplete="email" required></div>
             <div class="field full"><label for="ph" data-i18n="f.ph"></label>
               <div class="phone">
-                <select id="phCode" autocomplete="tel-country-code" data-i18n-attr="aria-label:f.phCode"></select>
+                <div class="cc"><span class="cc-show" aria-hidden="true"></span><select id="phCode" autocomplete="tel-country-code" data-i18n-attr="aria-label:f.phCode"></select></div>
                 <input id="ph" type="tel" inputmode="tel" autocomplete="tel-national" required data-i18n-attr="placeholder:f.phPh">
               </div>
               <small class="hint" data-i18n="f.phHint"></small></div>
@@ -238,17 +238,16 @@ try{if(!sessionStorage.getItem("gi-intro"))document.documentElement.classList.ad
     <div class="panel enquiry">
       <div class="sec-head"><p class="eyebrow" data-i18n="enq.eyebrow"></p><h3 data-i18n="enq.h3"></h3></div>
       <form id="fe" novalidate>
-        <div class="grid2">
+        <div class="grid2 enq-grid">
           <div class="field"><label for="evType" data-i18n="enq.type"></label><select id="evType"><option data-i18n="enq.o1"></option><option data-i18n="enq.o2"></option><option data-i18n="enq.o3"></option><option data-i18n="enq.o4"></option></select></div>
           <div class="field dp-field"><label for="evDate" data-i18n="enq.date"></label><button type="button" class="dpick" id="evDate" value="" aria-haspopup="dialog" aria-expanded="false"><span class="dp-txt"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button></div>
           <div class="field"><label for="evPeople" data-i18n="enq.people"></label><input type="number" id="evPeople" min="1" value="40"></div>
           <div class="field"><label for="evEmail">Email</label><input id="evEmail" type="email" autocomplete="email" required></div>
-          <div class="field full"><label for="evPh" data-i18n="f.ph"></label>
+          <div class="field enq-phone"><label for="evPh" data-i18n="f.ph"></label>
             <div class="phone">
-              <select id="evPhCode" autocomplete="tel-country-code" data-i18n-attr="aria-label:f.phCode"></select>
+              <div class="cc"><span class="cc-show" aria-hidden="true"></span><select id="evPhCode" autocomplete="tel-country-code" data-i18n-attr="aria-label:f.phCode"></select></div>
               <input id="evPh" type="tel" inputmode="tel" autocomplete="tel-national" required data-i18n-attr="placeholder:f.phPh">
-            </div>
-            <small class="hint" data-i18n="f.phHint"></small></div>
+            </div></div>
         </div>
         <p class="err" id="eE" role="alert"></p>
         <button class="btn btn-primary" type="submit" data-i18n="enq.send"></button>
@@ -881,8 +880,11 @@ function regionName(c){try{return new Intl.DisplayNames([lang],{type:"region"}).
 function renderPhoneCodes(){
   const others=PHONE_CODES.slice(2).sort((a,b)=>regionName(a[0]).localeCompare(regionName(b[0]),lang));
   const html=[...PHONE_CODES.slice(0,2),...others].map(([c,d])=>`<option value="${c}">+${d} · ${esc(regionName(c))}</option>`).join("");
-  ["#phCode","#evPhCode"].forEach(id=>{const sel=$(id);if(!sel)return;const v=sel.value||"GR";sel.innerHTML=html;sel.value=v});
+  ["#phCode","#evPhCode"].forEach(id=>{const sel=$(id);if(!sel)return;const v=sel.value||"GR";sel.innerHTML=html;sel.value=v;ccShow(sel)});
 }
+/* το κλειστό πεδίο δείχνει μόνο «+30 GR»· η λίστα έχει τα πλήρη ονόματα χωρών */
+function ccShow(sel){const d=(PHONE_CODES.find(x=>x[0]===sel.value)||PHONE_CODES[0]);sel.previousElementSibling.textContent=`+${d[1]} ${d[0]}`}
+["#phCode","#evPhCode"].forEach(id=>$(id).addEventListener("change",e=>ccShow(e.target)));
 const dial=(sel="#phCode")=>(PHONE_CODES.find(x=>x[0]===$(sel).value)||PHONE_CODES[0])[1];
 /* αριθμός + κωδικός χώρας → {e164:"+306912345678", disp:"+30 6912345678"} ή null αν δεν ταιριάζει με τη χώρα */
 function fullPhone(codeSel="#phCode",inputSel="#ph"){
@@ -1100,7 +1102,7 @@ $("#finish").onclick=async()=>{
 
 /* νέα κράτηση */
 function newBooking(scroll=true){
-  $("#f2").reset();$("#ctry").value=t("f.ctryDefault");$("#phCode").value="GR";$("#bfLive").textContent="";
+  $("#f2").reset();$("#ctry").value=t("f.ctryDefault");$("#phCode").value="GR";ccShow($("#phCode"));$("#bfLive").textContent="";
   booking={};goStep(1,scroll);
 }
 $("#again").onclick=()=>newBooking();
@@ -1118,7 +1120,7 @@ $("#fe").addEventListener("submit",async e=>{
   busy(btn,false);
   if(!r.ok) return fail("#eE",r.reason==="too_many"?t("eq.many"):r.reason==="invalid_phone"?phoneErr("#evPhCode"):r.reason==="invalid_email"?t("eq.email"):t("x.server"));
   $("#eE").classList.add("ok");$("#eE").textContent=t("eq.ok")(type);
-  $("#fe").reset();$("#evPhCode").value="GR";$("#evDate").value="";dpRefresh();
+  $("#fe").reset();$("#evPhCode").value="GR";ccShow($("#evPhCode"));$("#evDate").value="";dpRefresh();
 });
 
 /* footer */

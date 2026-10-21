@@ -28,7 +28,7 @@
 	"vars": {
 		// Emails (προαιρετικά — χρειάζονται λογαριασμό στο resend.com και το secret RESEND_API_KEY)
 		"MAIL_FROM": "Giardino <onboarding@resend.dev>",
-		"NOTIFY_EMAIL": "ΤΟ_EMAIL_ΣΑΣ",
+		"NOTIFY_EMAIL": "dimplastrakis@gmail.com",
 		// Τα δύο διαμερίσματα. Το slug είναι το id του δωματίου στο index.html (s1, s2).
 		"ROOMS": [
 			{
