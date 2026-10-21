@@ -19,7 +19,10 @@
 /* on laptops/desktops the whole page is one step larger (like browser zoom at 105%); phones and tablets stay as they are.
    Full-screen layers (intro, photo viewer, terms) keep their own size */
 @media (min-width:1024px) and (hover:hover) and (pointer:fine){header,main,footer{zoom:1.05}}
+/* κινητό: χωρίς λευκή λωρίδα στο "τράβηγμα" κάτω από το footer, χωρίς πλάγια μετακίνηση/ξεζουμ */
+html{background:var(--cream);overscroll-behavior-y:none;overflow-x:clip;-webkit-text-size-adjust:100%}
 html,body{margin:0;padding:0}
+body{overflow-x:clip}
 body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;font-weight:400}
 a{color:var(--leaf)}
 :focus-visible{outline:2px solid var(--wine);outline-offset:3px;border-radius:4px}
