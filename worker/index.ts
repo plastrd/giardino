@@ -298,7 +298,7 @@ async function getFails(env: Env, email: string) {
   return Number(await env.CACHE.get(failKey(email))) || 0;
 }
 
-async function sendVerifyCode(env: Env, rawEmail: string, lang?: string): Promise<OtpResult> {
+async function sendVerifyCode(env: Env, rawEmail: string, lang?: string, site = ""): Promise<OtpResult> {
   const email = normEmail(rawEmail);
   if ((await getFails(env, email)) >= OTP_MAX_FAILS) return { ok: false, reason: "too_many_attempts" };
 
@@ -315,7 +315,7 @@ async function sendVerifyCode(env: Env, rawEmail: string, lang?: string): Promis
   }
 
   const code = newCode();
-  const sent = await sendCodeEmail(env, rawEmail.trim(), code, lang === "en" ? "en" : "el");
+  const sent = await sendCodeEmail(env, rawEmail.trim(), code, lang === "en" ? "en" : "el", site);
   if (!sent) return { ok: false, reason: "email_failed" };
 
   // ο νέος κωδικός αντικαθιστά τον παλιό
@@ -365,19 +365,98 @@ async function isCodeValid(env: Env, rawEmail: string, code: unknown): Promise<b
 }
 const useCode = (env: Env, rawEmail: string) => env.CACHE.delete(otpKey(normEmail(rawEmail)));
 
-// Email με τον κωδικό — προσωρινή απλή μορφή· το σχέδιο του email θα γίνει αργότερα (αλλάζει μόνο αυτή η συνάρτηση).
-async function sendCodeEmail(env: Env, to: string, code: string, lang: "el" | "en"): Promise<boolean> {
-  const el = lang === "el";
-  const subject = el ? `Κωδικός επαλήθευσης: ${code}` : `Verification code: ${code}`;
-  const html =
-    `<p>${el ? "Ο κωδικός επαλήθευσης για την κράτησή σας στο Giardino είναι:" : "Your verification code for your booking at Giardino is:"}</p>` +
-    `<p style="font-size:28px;letter-spacing:6px;font-weight:bold">${code}</p>` +
-    `<p>${el ? "Ισχύει για 15 λεπτά. Αν δεν ζητήσατε εσείς κωδικό, αγνοήστε αυτό το μήνυμα." : "It is valid for 15 minutes. If you didn't request a code, you can ignore this email."}</p>`;
+// ---------- email με τον κωδικό επαλήθευσης ----------
+// Στα χρώματα του site. Πίνακες + inline styles ώστε να εμφανίζεται σωστά σε Gmail, Outlook, Apple Mail και κινητά.
+// Το λογότυπο φορτώνεται από το ίδιο το site (/img/wordmark.png).
+const OTP_TEXT = {
+  el: {
+    subject: (c: string) => `${c} – ο κωδικός επαλήθευσης για το Giardino`,
+    preheader: (c: string) => `Ο κωδικός σας: ${c}. Ισχύει για 15 λεπτά.`,
+    title: "Επαλήθευση email",
+    intro: "Χρησιμοποιήστε τον παρακάτω κωδικό για να ολοκληρώσετε την κράτησή σας στο Giardino.",
+    label: "Ο κωδικός σας",
+    copyBtn: "Αντιγραφή κωδικού",
+    copy: "ή πατήστε πάνω στον κωδικό για να τον επιλέξετε",
+    valid: "Ισχύει για 15 λεπτά. Αν ζητήσετε νέο κωδικό, αυτός παύει να ισχύει.",
+    ignore: "Αν δεν ζητήσατε εσείς αυτόν τον κωδικό, απλώς αγνοήστε αυτό το email. Δεν θα γίνει καμία κράτηση.",
+    address: "Ευξείνου Πόντου 22, Δράμα",
+  },
+  en: {
+    subject: (c: string) => `${c} – your Giardino verification code`,
+    preheader: (c: string) => `Your code: ${c}. Valid for 15 minutes.`,
+    title: "Verify your email",
+    intro: "Use the code below to complete your booking at Giardino.",
+    label: "Your code",
+    copyBtn: "Copy code",
+    copy: "or tap the code to select it",
+    valid: "Valid for 15 minutes. If you request a new code, this one stops working.",
+    ignore: "If you didn't request this code, simply ignore this email. No booking will be made.",
+    address: "22 Efxeinou Pontou, Drama, Greece",
+  },
+};
+
+function otpEmailHtml(code: string, lang: "el" | "en", site: string) {
+  const T = OTP_TEXT[lang];
+  const C = { bg: "#F4F2EC", card: "#FFFFFF", ink: "#2F3A2B", muted: "#686D5B", leaf: "#585B48", sage: "#8A916F", soft: "#EEEFE6", cream: "#E9E4D7", line: "#E4E0D4" };
+  const serif = "'GFS Didot','Didot','Bodoni 72',Georgia,'Times New Roman',serif";
+  const sans = "'Segoe UI',Helvetica,Arial,sans-serif";
+  // ο κωδικός ως ενιαίο κείμενο· ένα πάτημα τον επιλέγει ολόκληρο για αντιγραφή
+  const codeBox = `<div style="display:inline-block;padding:12px 22px;background:${C.card};border:1px solid ${C.sage};border-radius:10px;font-family:${serif};font-size:34px;line-height:1.2;letter-spacing:6px;color:${C.ink};-webkit-user-select:all;user-select:all;white-space:nowrap">${code}</div>`;
+  const logo = site
+    ? `<img src="${site}/img/wordmark.png" width="170" alt="Giardino" style="display:block;margin:0 auto;width:170px;max-width:60%;height:auto;border:0">`
+    : `<div style="font-family:${serif};font-size:34px;color:${C.leaf}">giardino</div>`;
+  return `<!doctype html>
+<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${T.title}</title></head>
+<body style="margin:0;padding:0;background:${C.bg};-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${C.bg}">${T.preheader(code)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg}">
+<tr><td align="center" style="padding:32px 8px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:${C.card};border:1px solid ${C.line};border-radius:16px;overflow:hidden">
+    <tr><td align="center" style="padding:30px 28px 22px;background:${C.cream}">${logo}</td></tr>
+    <tr><td style="height:3px;line-height:3px;font-size:0;background:${C.leaf}">&nbsp;</td></tr>
+    <tr><td style="padding:34px 32px 8px;font-family:${sans};color:${C.ink}">
+      <h1 style="margin:0 0 12px;font-family:${serif};font-weight:normal;font-size:30px;line-height:1.15;color:${C.ink}">${T.title}</h1>
+      <p style="margin:0;font-size:16px;line-height:1.6;color:${C.muted}">${T.intro}</p>
+    </td></tr>
+    <tr><td align="center" style="padding:26px 12px 6px">
+      <div style="background:${C.soft};border-radius:14px;padding:20px 6px 22px">
+        <p style="margin:0 0 12px;font-family:${sans};font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;color:${C.sage}">${T.label}</p>
+        ${codeBox}
+        ${site ? `<div style="margin-top:16px"><a href="${site}/copy.html#c=${code}&amp;l=${lang}" style="display:inline-block;padding:11px 22px;border-radius:999px;background:${C.leaf};color:#FFFFFF;font-family:${sans};font-size:14px;font-weight:600;text-decoration:none">${T.copyBtn}</a></div>` : ""}
+        <p style="margin:12px 0 0;font-family:${sans};font-size:12px;color:${C.muted}">${T.copy}</p>
+      </div>
+    </td></tr>
+    <tr><td style="padding:18px 32px 30px;font-family:${sans}">
+      <p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:${C.ink}">${T.valid}</p>
+      <p style="margin:0;font-size:13px;line-height:1.6;color:${C.muted}">${T.ignore}</p>
+    </td></tr>
+    <tr><td style="padding:22px 32px;background:${C.leaf};font-family:${sans};font-size:13px;line-height:1.7;color:${C.cream}">
+      <span style="font-family:${serif};font-size:17px;color:#FFFFFF">Giardino</span><br>
+      Espresso Wine Bar &amp; High Living Suites<br>
+      ${T.address} · <a href="tel:+302521402133" style="color:${C.cream};text-decoration:none;white-space:nowrap">+30 2521 402133</a>
+    </td></tr>
+  </table>
+</td></tr></table>
+</body></html>`;
+}
+
+function otpEmailText(code: string, lang: "el" | "en") {
+  const T = OTP_TEXT[lang];
+  return `${T.title}\n\n${T.intro}\n\n${T.label}: ${code}\n\n${T.valid}\n${T.ignore}\n\nGiardino · Espresso Wine Bar & High Living Suites\n${T.address} · +30 2521 402133`;
+}
+
+async function sendCodeEmail(env: Env, to: string, code: string, lang: "el" | "en", site = ""): Promise<boolean> {
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: env.MAIL_FROM, to, subject, html }),
+      body: JSON.stringify({
+        from: env.MAIL_FROM, to,
+        subject: OTP_TEXT[lang].subject(code),
+        html: otpEmailHtml(code, lang, site),
+        text: otpEmailText(code, lang),
+      }),
     });
     if (!r.ok) console.error("verify email failed", r.status, (await r.text()).slice(0, 300));
     return r.ok;
@@ -535,7 +614,7 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
     const b: any = await req.json().catch(() => ({}));
     const email = String(b.email ?? "").trim();
     if (!EMAIL_RE.test(email) || email.length > 200) return json({ ok: false, reason: "invalid_email" }, 400);
-    const r = await sendVerifyCode(env, email, b.lang);
+    const r = await sendVerifyCode(env, email, b.lang, url.origin);
     return json(r, r.ok ? 200 : r.reason === "too_soon" || r.reason === "too_many_sends" ? 429 : r.reason === "too_many_attempts" ? 403 : 400);
   }
 
