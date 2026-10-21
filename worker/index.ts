@@ -365,9 +365,44 @@ async function isCodeValid(env: Env, rawEmail: string, code: unknown): Promise<b
 }
 const useCode = (env: Env, rawEmail: string) => env.CACHE.delete(otpKey(normEmail(rawEmail)));
 
+// ---------- emails: κοινή εμφάνιση ----------
+// Στα χρώματα του site, συμπαγή ώστε να χωράνε στην οθόνη. Πίνακες + inline styles για Gmail, Outlook, Apple Mail, κινητά.
+const MC = { bg: "#F4F2EC", card: "#FFFFFF", ink: "#2F3A2B", muted: "#686D5B", leaf: "#585B48", sage: "#8A916F", soft: "#EEEFE6", cream: "#E9E4D7", line: "#E4E0D4" };
+const M_SERIF = "'GFS Didot','Didot','Bodoni 72',Georgia,'Times New Roman',serif";
+const M_SANS = "'Segoe UI',Helvetica,Arial,sans-serif";
+const escH = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
+// σπάει την αυτόματη αναγνώριση διευθύνσεων/τηλεφώνων (μπλε σύνδεσμοι στο Gmail/iPhone)
+const noLink = (s: string) => s.split(" ").join("&zwnj; ");
+const M_FOOT = {
+  el: { address: "Ευξείνου Πόντου 22, Δράμα" },
+  en: { address: "22 Efxeinou Pontou, Drama, Greece" },
+};
+
+function emailLayout(o: { lang: "el" | "en"; site: string; title: string; preheader: string; body: string }) {
+  const logo = o.site
+    ? `<img src="${o.site}/img/wordmark.png" width="130" alt="Giardino" style="display:block;margin:0 auto;width:130px;height:auto;border:0">`
+    : `<div style="font-family:${M_SERIF};font-size:28px;color:${MC.leaf}">giardino</div>`;
+  return `<!doctype html>
+<html lang="${o.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${escH(o.title)}</title>
+<style>a[x-apple-data-detectors],.nolink a{color:inherit!important;text-decoration:none!important;font:inherit!important}</style></head>
+<body style="margin:0;padding:0;background:${MC.bg};-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${MC.bg}">${escH(o.preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${MC.bg}">
+<tr><td align="center" style="padding:16px 8px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:${MC.card};border:1px solid ${MC.line};border-radius:14px;overflow:hidden">
+    <tr><td align="center" style="padding:16px 20px 14px;background:${MC.cream};border-bottom:3px solid ${MC.leaf}">${logo}</td></tr>
+    ${o.body}
+    <tr><td class="nolink" style="padding:12px 24px;background:${MC.leaf};font-family:${M_SANS};font-size:12px;line-height:1.6;color:${MC.cream}">
+      <span style="font-family:${M_SERIF};font-size:15px;color:#FFFFFF">Giardino</span> · <span style="color:${MC.cream}">${noLink(M_FOOT[o.lang].address)}</span> · <span style="color:${MC.cream};white-space:nowrap">+30&zwnj; 2521&zwnj; 402133</span>
+    </td></tr>
+  </table>
+</td></tr></table>
+</body></html>`;
+}
+
 // ---------- email με τον κωδικό επαλήθευσης ----------
-// Στα χρώματα του site. Πίνακες + inline styles ώστε να εμφανίζεται σωστά σε Gmail, Outlook, Apple Mail και κινητά.
-// Το λογότυπο φορτώνεται από το ίδιο το site (/img/wordmark.png).
 const OTP_TEXT = {
   el: {
     subject: "Giardino - Κωδικός επαλήθευσης",
@@ -375,9 +410,7 @@ const OTP_TEXT = {
     title: "Επαλήθευση email",
     intro: "Χρησιμοποιήστε τον παρακάτω κωδικό για να ολοκληρώσετε την κράτησή σας.",
     label: "Ο κωδικός σας",
-    copy: "Πατήστε πάνω στον κωδικό για να τον επιλέξετε και να τον αντιγράψετε.",
     valid: "Ισχύει για 15 λεπτά· αν ζητήσετε νέο, αυτός παύει να ισχύει. Αν δεν ζητήσατε εσείς κωδικό, αγνοήστε αυτό το email.",
-    address: "Ευξείνου Πόντου 22, Δράμα",
   },
   en: {
     subject: "Giardino - Verification code",
@@ -385,57 +418,34 @@ const OTP_TEXT = {
     title: "Verify your email",
     intro: "Use the code below to complete your booking.",
     label: "Your code",
-    copy: "Tap the code to select it and copy it.",
     valid: "Valid for 15 minutes; requesting a new code cancels this one. If you didn't request a code, ignore this email.",
-    address: "22 Efxeinou Pontou, Drama, Greece",
   },
 };
 
-// συμπαγές, ώστε να χωράει ολόκληρο στην οθόνη χωρίς κύλιση
 function otpEmailHtml(code: string, lang: "el" | "en", site: string) {
   const T = OTP_TEXT[lang];
-  const C = { bg: "#F4F2EC", card: "#FFFFFF", ink: "#2F3A2B", muted: "#686D5B", leaf: "#585B48", sage: "#8A916F", soft: "#EEEFE6", cream: "#E9E4D7", line: "#E4E0D4" };
-  const serif = "'GFS Didot','Didot','Bodoni 72',Georgia,'Times New Roman',serif";
-  const sans = "'Segoe UI',Helvetica,Arial,sans-serif";
-  // ο κωδικός ως ενιαίο κείμενο· ένα πάτημα τον επιλέγει ολόκληρο για αντιγραφή
-  const codeBox = `<div style="display:inline-block;padding:10px 20px;background:${C.card};border:1px solid ${C.sage};border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:32px;font-weight:bold;line-height:1.2;letter-spacing:5px;color:${C.ink};-webkit-user-select:all;user-select:all;white-space:nowrap">${code}</div>`;
-  const logo = site
-    ? `<img src="${site}/img/wordmark.png" width="130" alt="Giardino" style="display:block;margin:0 auto;width:130px;height:auto;border:0">`
-    : `<div style="font-family:${serif};font-size:28px;color:${C.leaf}">giardino</div>`;
-  return `<!doctype html>
-<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${T.title}</title></head>
-<body style="margin:0;padding:0;background:${C.bg};-webkit-text-size-adjust:100%">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${C.bg}">${T.preheader(code)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg}">
-<tr><td align="center" style="padding:16px 8px">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:${C.card};border:1px solid ${C.line};border-radius:14px;overflow:hidden">
-    <tr><td align="center" style="padding:16px 20px 14px;background:${C.cream};border-bottom:3px solid ${C.leaf}">${logo}</td></tr>
-    <tr><td style="padding:22px 24px 0;font-family:${sans};color:${C.ink}">
-      <h1 style="margin:0 0 6px;font-family:${serif};font-weight:normal;font-size:24px;line-height:1.2;color:${C.ink}">${T.title}</h1>
-      <p style="margin:0;font-size:15px;line-height:1.5;color:${C.muted}">${T.intro}</p>
+  // ο κωδικός ως ενιαίο κείμενο σε Arial· ένα πάτημα τον επιλέγει ολόκληρο
+  const codeBox = `<div style="display:inline-block;padding:10px 20px;background:${MC.card};border:1px solid ${MC.sage};border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:32px;font-weight:bold;line-height:1.2;letter-spacing:5px;color:${MC.ink};-webkit-user-select:all;user-select:all;white-space:nowrap">${code}</div>`;
+  const body = `
+    <tr><td style="padding:22px 24px 0;font-family:${M_SANS};color:${MC.ink}">
+      <h1 style="margin:0 0 6px;font-family:${M_SERIF};font-weight:normal;font-size:24px;line-height:1.2;color:${MC.ink}">${T.title}</h1>
+      <p style="margin:0;font-size:15px;line-height:1.5;color:${MC.muted}">${T.intro}</p>
     </td></tr>
     <tr><td align="center" style="padding:16px 12px 0">
-      <div style="background:${C.soft};border-radius:12px;padding:14px 6px 14px">
-        <p style="margin:0 0 8px;font-family:${sans};font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:600;color:${C.sage}">${T.label}</p>
+      <div style="background:${MC.soft};border-radius:12px;padding:14px 6px 16px">
+        <p style="margin:0 0 8px;font-family:${M_SANS};font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:600;color:${MC.sage}">${T.label}</p>
         ${codeBox}
-        <p style="margin:8px 0 0;font-family:${sans};font-size:12px;color:${C.muted}">${T.copy}</p>
       </div>
     </td></tr>
-    <tr><td style="padding:14px 24px 20px;font-family:${sans}">
-      <p style="margin:0;font-size:13px;line-height:1.55;color:${C.muted}">${T.valid}</p>
-    </td></tr>
-    <tr><td style="padding:12px 24px;background:${C.leaf};font-family:${sans};font-size:12px;line-height:1.6;color:${C.cream}">
-      <span style="font-family:${serif};font-size:15px;color:#FFFFFF">Giardino</span> · ${T.address} · <a href="tel:+302521402133" style="color:${C.cream};text-decoration:none;white-space:nowrap">+30 2521 402133</a>
-    </td></tr>
-  </table>
-</td></tr></table>
-</body></html>`;
+    <tr><td style="padding:14px 24px 20px;font-family:${M_SANS}">
+      <p style="margin:0;font-size:13px;line-height:1.55;color:${MC.muted}">${T.valid}</p>
+    </td></tr>`;
+  return emailLayout({ lang, site, title: T.title, preheader: T.preheader(code), body });
 }
 
 function otpEmailText(code: string, lang: "el" | "en") {
   const T = OTP_TEXT[lang];
-  return `${T.title}\n\n${T.intro}\n\n${T.label}: ${code}\n\n${T.valid}\n\nGiardino · ${T.address} · +30 2521 402133`;
+  return `${T.title}\n\n${T.intro}\n\n${T.label}: ${code}\n\n${T.valid}\n\nGiardino · ${M_FOOT[lang].address} · +30 2521 402133`;
 }
 
 async function sendCodeEmail(env: Env, to: string, code: string, lang: "el" | "en", site = ""): Promise<boolean> {
@@ -520,7 +530,7 @@ async function book(env: Env, ctx: ExecutionContext, req: Request, b: BookingInp
   // κλείνουμε αμέσως τις μέρες στην cache, για να μη τις δει διαθέσιμες άλλος
   ctx.waitUntil(markBlocked(env, room.slug, b.checkIn, b.checkOut));
   ctx.waitUntil(useCode(env, b.guest.email));        // ο κωδικός ισχύει για μία κράτηση
-  ctx.waitUntil(sendEmails(env, room, b, p));
+  ctx.waitUntil(sendEmails(env, room, b, p, new URL(req.url).origin));
 
   return json({ ok: true, bookingId: created?.id ?? null, ...p });
 }
@@ -532,33 +542,105 @@ async function markBlocked(env: Env, slug: string, from: string, to: string) {
   await env.CACHE.put(SNAPSHOT_KEY, JSON.stringify(snap));
 }
 
-async function sendEmails(env: Env, room: Room, b: BookingInput, p: Pricing) {
+// ---------- email ολοκλήρωσης κράτησης ----------
+// Ελληνικά ονόματα δωματίων (ίδια με το site)· αλλιώς χρησιμοποιείται το name από το wrangler.jsonc
+const ROOM_NAMES: Record<string, { el: string; en: string }> = {
+  s1: { el: "Διαμέρισμα ενός υπνοδωματίου", en: "One-Bedroom Apartment" },
+  s2: { el: "Διαμέρισμα δύο υπνοδωματίων", en: "Two-Bedroom Apartment" },
+};
+const BOOK_TEXT = {
+  el: {
+    subject: "Ολοκλήρωση κράτησης",
+    title: "Ολοκλήρωση κράτησης",
+    thanks: (n: string) => `Σας ευχαριστούμε, ${n}!`,
+    intro: "Η κράτησή σας στο Giardino καταχωρήθηκε. Ακολουθούν τα στοιχεία της:",
+    room: "Δωμάτιο", dates: "Ημερομηνίες", guests: "Άτομα", breakfast: "Πρωινό", total: "Σύνολο", deposit: "Προκαταβολή",
+    nights: (n: number) => (n === 1 ? "1 νύχτα" : `${n} νύχτες`),
+    yes: (x: string) => `Ναι (${x})`, no: "Όχι",
+    noDeposit: "Δεν χρειάζεται προκαταβολή",
+    host: "Ο οικοδεσπότης θα έρθει σύντομα σε τηλεφωνική επικοινωνία μαζί σας.",
+    locale: "el-GR",
+  },
+  en: {
+    subject: "Booking completed",
+    title: "Booking completed",
+    thanks: (n: string) => `Thank you, ${n}!`,
+    intro: "Your booking at Giardino has been received. Here are the details:",
+    room: "Room", dates: "Dates", guests: "Guests", breakfast: "Breakfast", total: "Total", deposit: "Deposit",
+    nights: (n: number) => (n === 1 ? "1 night" : `${n} nights`),
+    yes: (x: string) => `Yes (${x})`, no: "No",
+    noDeposit: "No deposit required",
+    host: "Your host will contact you by phone shortly.",
+    locale: "en-GB",
+  },
+};
+
+const bookDay = (d: string, lang: "el" | "en") =>
+  new Date(d + "T12:00:00Z").toLocaleDateString(BOOK_TEXT[lang].locale, { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+function bookingEmailHtml(room: Room, b: BookingInput, p: Pricing, lang: "el" | "en", site: string) {
+  const T = BOOK_TEXT[lang];
+  const day = (d: string) => bookDay(d, lang);
+  const rows: [string, string, boolean?][] = [
+    [T.room, ROOM_NAMES[room.slug]?.[lang] ?? room.name],
+    [T.dates, `<span style="white-space:nowrap">${day(b.checkIn)} →</span> <span style="white-space:nowrap">${day(b.checkOut)}</span><br><span style="color:${MC.muted}">${T.nights(p.nights)}</span>`],
+    [T.guests, String(b.adults)],
+    [T.breakfast, p.breakfast ? T.yes(money(p.breakfast, p.currency)) : T.no],
+    [T.total, `<b>${money(p.total, p.currency)}</b>`],
+    [T.deposit, p.deposit ? `<b>${money(p.deposit, p.currency)}</b>` : T.noDeposit],
+  ];
+  const table = rows.map(([k, v], i) =>
+    `<tr><td style="padding:9px 0;${i ? `border-top:1px solid ${MC.line};` : ""}font-size:13px;color:${MC.muted};vertical-align:top;width:38%">${k}</td>` +
+    `<td class="nolink" style="padding:9px 0;${i ? `border-top:1px solid ${MC.line};` : ""}font-size:14px;color:${MC.ink};text-align:right">${v}</td></tr>`).join("");
+  const body = `
+    <tr><td style="padding:22px 24px 0;font-family:${M_SANS};color:${MC.ink}">
+      <h1 style="margin:0 0 6px;font-family:${M_SERIF};font-weight:normal;font-size:24px;line-height:1.2;color:${MC.ink}">${T.thanks(escH(b.guest.name))}</h1>
+      <p style="margin:0;font-size:15px;line-height:1.5;color:${MC.muted}">${T.intro}</p>
+    </td></tr>
+    <tr><td style="padding:14px 16px 0">
+      <div style="background:${MC.soft};border-radius:12px;padding:6px 16px">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${M_SANS}">${table}</table>
+      </div>
+    </td></tr>
+    <tr><td style="padding:16px 24px 20px;font-family:${M_SANS}">
+      <p style="margin:0;font-size:14px;line-height:1.55;color:${MC.ink}">${T.host}</p>
+    </td></tr>`;
+  return emailLayout({ lang, site, title: T.title, preheader: `${T.thanks(b.guest.name)} ${T.intro}`, body });
+}
+
+function bookingEmailText(room: Room, b: BookingInput, p: Pricing, lang: "el" | "en") {
+  const T = BOOK_TEXT[lang];
+  return [
+    T.thanks(b.guest.name), "", T.intro, "",
+    `${T.room}: ${ROOM_NAMES[room.slug]?.[lang] ?? room.name}`,
+    `${T.dates}: ${bookDay(b.checkIn, lang)} → ${bookDay(b.checkOut, lang)} (${T.nights(p.nights)})`,
+    `${T.guests}: ${b.adults}`,
+    `${T.breakfast}: ${p.breakfast ? T.yes(money(p.breakfast, p.currency)) : T.no}`,
+    `${T.total}: ${money(p.total, p.currency)}`,
+    `${T.deposit}: ${p.deposit ? money(p.deposit, p.currency) : T.noDeposit}`,
+    "", T.host, "", `Giardino · ${M_FOOT[lang].address} · +30 2521 402133`,
+  ].join("\n");
+}
+
+async function sendEmails(env: Env, room: Room, b: BookingInput, p: Pricing, site = "") {
   if (!env.RESEND_API_KEY || !env.MAIL_FROM) return;
-  const el = b.lang !== "en";
-  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
-  const summary = `${esc(room.name)}: ${b.checkIn} → ${b.checkOut}, ${b.adults} ${el ? "άτομα" : "guests"}` +
-    `${p.breakfast ? (el ? ", με πρωινό" : ", with breakfast") : ""}, ${el ? "σύνολο" : "total"} ${money(p.total, p.currency)}`;
-  const deposit = p.deposit
-    ? `<p>${el
-        ? `Απαιτείται προκαταβολή ${money(p.deposit, p.currency)}. Θα λάβετε ξεχωριστό email με οδηγίες. Οι ημερομηνίες δεσμεύονται μόνο αφού κατατεθεί η προκαταβολή.`
-        : `A deposit of ${money(p.deposit, p.currency)} is required. You'll receive a separate email with instructions. Your dates are secured only once the deposit has been paid.`}</p>`
-    : "";
-  const send = (to: string, subject: string, html: string) =>
+  const lang: "el" | "en" = b.lang === "en" ? "en" : "el";
+  const send = (to: string, subject: string, html: string, text?: string) =>
     fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: env.MAIL_FROM, to, subject, html }),
-    });
+      body: JSON.stringify({ from: env.MAIL_FROM, to, subject, html, ...(text ? { text } : {}) }),
+    }).then(async (r) => { if (!r.ok) console.error("booking email failed", r.status, (await r.text()).slice(0, 300)); });
 
   const jobs = [
-    send(b.guest.email,
-      el ? "Η κράτησή σας στο Giardino" : "Your booking at Giardino",
-      `<p>${el ? "Ευχαριστούμε" : "Thank you"}, ${esc(b.guest.name)}!</p><p>${summary}</p>${deposit}`),
+    send(b.guest.email, BOOK_TEXT[lang].subject, bookingEmailHtml(room, b, p, lang, site), bookingEmailText(room, b, p, lang)),
   ];
-  if (env.NOTIFY_EMAIL)
-    jobs.push(send(env.NOTIFY_EMAIL, `Νέα κράτηση από το site – ${esc(b.guest.name)}`,
-      `<p>${summary}</p><p>${esc(b.guest.email)} · ${esc(b.guest.phone)}</p>` +
-      `<p>${esc(bookingNotes(b, p)).replace(/\n/g, "<br>")}</p>`));
+  // ειδοποίηση στον ιδιοκτήτη (απλή, με όλα τα στοιχεία)
+  if (env.NOTIFY_EMAIL && EMAIL_RE.test(env.NOTIFY_EMAIL))
+    jobs.push(send(env.NOTIFY_EMAIL, `Νέα κράτηση από το site – ${escH(b.guest.name)}`,
+      `<p>${escH(ROOM_NAMES[room.slug]?.el ?? room.name)}: ${b.checkIn} → ${b.checkOut}, ${b.adults} άτομα, σύνολο ${money(p.total, p.currency)}</p>` +
+      `<p>${escH(b.guest.name)} · ${escH(b.guest.email)} · ${escH(b.guest.phone)}</p>` +
+      `<p>${escH(bookingNotes(b, p)).replace(/\n/g, "<br>")}</p>`));
   await Promise.allSettled(jobs);
 }
 
@@ -621,7 +703,10 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
   if (p === "/api/verify/reset" && req.method === "POST") {
     const b: any = await req.json().catch(() => ({}));
     const email = String(b.email ?? "").trim();
-    if (EMAIL_RE.test(email) && email.length <= 200) await env.CACHE.delete(otpKey(normEmail(email)));
+    // ο κωδικός ακυρώνεται και η αναμονή του 1 λεπτού μηδενίζεται → μπορεί να σταλεί αμέσως νέος
+    // (το όριο αποστολών ανά ώρα εξακολουθεί να ισχύει)
+    if (EMAIL_RE.test(email) && email.length <= 200)
+      await Promise.all([env.CACHE.delete(otpKey(normEmail(email))), env.CACHE.delete(coolKey(normEmail(email)))]);
     return json({ ok: true });
   }
 

@@ -248,6 +248,10 @@ input[type="date"]{min-width:0;display:block}
 .cal-nav:disabled{opacity:.3;cursor:default}
 .cal-nav{display:grid;place-items:center;padding:0}
 .cal-nav .ico{display:block;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* icons in round buttons: pinned to the exact centre (works the same in Safari, Chrome and Firefox) */
+.cal-nav,.lb-close,.terms-close{position:relative}
+.cal-nav,.lb-close,.lb-nav,.terms-close{-webkit-appearance:none;appearance:none;aspect-ratio:1;flex:none;line-height:0}
+.cal-nav .ico,.lb-close .ico,.lb-nav .ico,.terms-close .ico{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-wd{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;padding:2px 0 6px}
 .cal-day{aspect-ratio:1;min-width:0;border:0;border-radius:50%;background:none;font:inherit;font-size:.9rem;color:var(--ink);font-variant-numeric:tabular-nums;cursor:pointer;padding:0}
