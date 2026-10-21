@@ -544,7 +544,7 @@ body.lb-open{overflow:hidden}
 .intro-c{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px;padding:28px 30px 24px;background:radial-gradient(closest-side,#E9ECDF 70%,transparent)}
 .intro img{width:clamp(76px,10vw,108px);height:auto;animation:introPulse 1.8s ease-in-out infinite}
 .intro-bar{position:relative;width:clamp(90px,12vw,130px);height:1px;background:color-mix(in srgb,var(--sage) 35%,transparent);overflow:hidden}
-.intro-bar::after{content:"";position:absolute;inset:0;background:var(--leaf);transform:scaleX(0);transform-origin:left;animation:introLoad 3.2s cubic-bezier(.4,0,.2,1) forwards}
+.intro-bar::after{content:"";position:absolute;inset:0;background:var(--leaf);transform:scaleX(0);transform-origin:left;animation:introLoad 2s cubic-bezier(.4,0,.2,1) forwards}
 .intro.out{transform:translateY(-100%)}
 @keyframes introPulse{0%,100%{opacity:.3}50%{opacity:1}}
 @keyframes introLoad{to{transform:scaleX(1)}}
