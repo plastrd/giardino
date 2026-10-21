@@ -22,7 +22,7 @@
 /* κινητό: χωρίς λευκή λωρίδα στο "τράβηγμα" κάτω από το footer, χωρίς πλάγια μετακίνηση/ξεζουμ */
 html{background:var(--cream);overscroll-behavior-y:none;overflow-x:clip;-webkit-text-size-adjust:100%}
 html,body{margin:0;padding:0}
-body{overflow-x:clip}
+body{overflow-x:clip;overscroll-behavior-y:none}
 body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;font-weight:400}
 a{color:var(--leaf)}
 :focus-visible{outline:2px solid var(--wine);outline-offset:3px;border-radius:4px}
@@ -378,6 +378,8 @@ input[type="date"]{min-width:0;display:block}
 /* footer */
 footer{background:var(--cream);color:var(--ink);margin-top:auto;width:100%}
 footer{overflow:hidden}
+/* κινητό: το κρεμ του footer συνεχίζει και κάτω από το τέλος της σελίδας, ώστε στο "τράβηγμα" να μη φαίνεται ποτέ λευκό */
+footer{box-shadow:0 50vh 0 50vh var(--cream)}
 /* the line above the copyright runs edge to edge of the page */
 .fbottom::before{content:"";position:absolute;top:0;left:50%;width:200vw;transform:translateX(-50%);border-top:1px solid var(--sage)}
 main{flex:1 0 auto;margin-bottom:20px}
