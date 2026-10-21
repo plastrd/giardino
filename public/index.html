@@ -242,7 +242,13 @@ try{if(!sessionStorage.getItem("gi-intro"))document.documentElement.classList.ad
           <div class="field"><label for="evType" data-i18n="enq.type"></label><select id="evType"><option data-i18n="enq.o1"></option><option data-i18n="enq.o2"></option><option data-i18n="enq.o3"></option><option data-i18n="enq.o4"></option></select></div>
           <div class="field dp-field"><label for="evDate" data-i18n="enq.date"></label><button type="button" class="dpick" id="evDate" value="" aria-haspopup="dialog" aria-expanded="false"><span class="dp-txt"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button></div>
           <div class="field"><label for="evPeople" data-i18n="enq.people"></label><input type="number" id="evPeople" min="1" value="40"></div>
-          <div class="field"><label for="evContact" data-i18n="enq.contact"></label><input id="evContact" required></div>
+          <div class="field"><label for="evEmail">Email</label><input id="evEmail" type="email" autocomplete="email" required></div>
+          <div class="field full"><label for="evPh" data-i18n="f.ph"></label>
+            <div class="phone">
+              <select id="evPhCode" autocomplete="tel-country-code" data-i18n-attr="aria-label:f.phCode"></select>
+              <input id="evPh" type="tel" inputmode="tel" autocomplete="tel-national" required data-i18n-attr="placeholder:f.phPh">
+            </div>
+            <small class="hint" data-i18n="f.phHint"></small></div>
         </div>
         <p class="err" id="eE" role="alert"></p>
         <button class="btn btn-primary" type="submit" data-i18n="enq.send"></button>
@@ -385,7 +391,7 @@ el:{
   "e.min":"Η αναχώρηση πρέπει να είναι τουλάχιστον μία μέρα μετά την άφιξη.",
   "e.cap":(r,c)=>`Το ${r} φιλοξενεί έως ${c} άτομα. Επιλέξτε άλλο δωμάτιο ή λιγότερους επισκέπτες.`,
   "e.name":"Συμπληρώστε όνομα και επώνυμο.","e.email":"Ελέγξτε το email, π.χ. onoma@example.com.",
-  "e.phone":"Συμπληρώστε έναν έγκυρο αριθμό τηλεφώνου, χωρίς τον κωδικό χώρας.","e.phoneGR":"Ο ελληνικός αριθμός πρέπει να έχει 10 ψηφία, π.χ. 6912345678.","e.ok":"Χρειάζεται η συγκατάθεσή σας για να προχωρήσουμε.",
+  "e.phone":"Συμπληρώστε έναν έγκυρο αριθμό τηλεφώνου, χωρίς τον κωδικό χώρας.","e.phoneGR":"Ο ελληνικός αριθμός πρέπει να έχει 10 ψηφία, π.χ. 6912345678.","e.phoneLen":(c,n)=>`Ο αριθμός για ${c} πρέπει να έχει ${n} ψηφία, χωρίς τον κωδικό χώρας.`,"e.ok":"Χρειάζεται η συγκατάθεσή σας για να προχωρήσουμε.",
   "s.room":"Δωμάτιο","s.ci":"Άφιξη","s.co":"Αναχώρηση","s.nights":"Νύχτες","s.guests":"Επισκέπτες","s.phone":"Τηλέφωνο",
   "a.total":"Σύνολο","a.checking":"Έλεγχος…","f.sending":"Αποστολή…","s.total":"Σύνολο",
   "x.not_available":"Δεν υπάρχει διαθεσιμότητα για αυτές τις ημερομηνίες. Δοκιμάστε άλλες ημερομηνίες ή το άλλο διαμέρισμα.",
@@ -399,8 +405,8 @@ el:{
   "x.captcha_failed":"Η επαλήθευση απέτυχε. Δοκιμάστε ξανά.",
   "x.taken":"Οι ημερομηνίες μόλις κλείστηκαν από άλλον επισκέπτη. Επιλέξτε άλλες ημερομηνίες.",
   "x.server":"Κάτι πήγε στραβά. Δοκιμάστε ξανά ή καλέστε μας στο +30 2521 402133.",
-  "eq.empty":"Αφήστε email ή τηλέφωνο για να σας απαντήσουμε.",
-  "eq.ok":(t,c)=>`Το αίτημα για ${t.toLowerCase()} καταχωρήθηκε. Θα επικοινωνήσουμε μαζί σας στο ${c}.`,
+  "eq.email":"Συμπληρώστε ένα έγκυρο email για να σας απαντήσουμε.",
+  "eq.ok":t=>`Το αίτημα για ${t.toLowerCase()} στάλθηκε. Θα επικοινωνήσουμε σύντομα μαζί σας.`,"eq.many":"Έχετε στείλει ήδη αρκετά αιτήματα. Καλέστε μας στο +30 2521 402133.",
   "barLabels":["Ο χώρος του καφέ","Το bar","Espresso","Κρασί","Εκδηλώσεις"]
 },
 en:{
@@ -473,7 +479,7 @@ en:{
   "e.min":"Check-out must be at least one day after check-in.",
   "e.cap":(r,c)=>`The ${r} sleeps up to ${c} guests. Choose another room or fewer guests.`,
   "e.name":"Please enter your first and last name.","e.email":"Check your email, e.g. name@example.com.",
-  "e.phone":"Enter a valid phone number, without the country code.","e.phoneGR":"A Greek number must have 10 digits, e.g. 6912345678.","e.ok":"We need your consent to continue.",
+  "e.phone":"Enter a valid phone number, without the country code.","e.phoneGR":"A Greek number must have 10 digits, e.g. 6912345678.","e.phoneLen":(c,n)=>`A number for ${c} must have ${n} digits, without the country code.`,"e.ok":"We need your consent to continue.",
   "s.room":"Room","s.ci":"Check-in","s.co":"Check-out","s.nights":"Nights","s.guests":"Guests","s.phone":"Phone",
   "a.total":"Total","a.checking":"Checking…","f.sending":"Sending…","s.total":"Total",
   "x.not_available":"There's no availability for these dates. Try other dates or the other apartment.",
@@ -487,8 +493,8 @@ en:{
   "x.captcha_failed":"Verification failed. Please try again.",
   "x.taken":"These dates were just booked by another guest. Please choose other dates.",
   "x.server":"Something went wrong. Please try again or call us on +30 2521 402133.",
-  "eq.empty":"Leave an email or phone number so we can reply.",
-  "eq.ok":(t,c)=>`Your request for a ${t.toLowerCase()} has been received. We'll contact you at ${c}.`,
+  "eq.email":"Enter a valid email so we can reply.",
+  "eq.ok":t=>`Your request for a ${t.toLowerCase()} has been sent. We'll be in touch soon.`,"eq.many":"You've already sent several requests. Please call us on +30 2521 402133.",
   "barLabels":["The café","The bar","Espresso","Wine","Events"]
 }};
 
@@ -867,24 +873,33 @@ const PHONE_CODES=[["GR","30"],["CY","357"],["AL","355"],["AM","374"],["AT","43"
   ["CZ","420"],["DE","49"],["DK","45"],["EE","372"],["EG","20"],["ES","34"],["FI","358"],["FR","33"],["GB","44"],["GE","995"],["HR","385"],
   ["HU","36"],["IE","353"],["IL","972"],["IT","39"],["LB","961"],["LT","370"],["LU","352"],["LV","371"],["MK","389"],["MT","356"],["NL","31"],
   ["NO","47"],["PL","48"],["PT","351"],["RO","40"],["RS","381"],["RU","7"],["SE","46"],["SI","386"],["SK","421"],["TR","90"],["UA","380"],["US","1"]];
+/* σωστό πλήθος ψηφίων ανά χώρα (εθνικός αριθμός, χωρίς κωδικό χώρας και χωρίς το αρχικό 0) */
+const PHONE_LEN={GR:[10],CY:[8],AL:[8,9],AM:[8],AT:[7,13],AU:[9],BE:[8,9],BG:[8,9],CA:[10],CH:[9],CZ:[9],DE:[6,12],DK:[8],EE:[7,8],EG:[9,10],
+  ES:[9],FI:[6,11],FR:[9],GB:[9,10],GE:[9],HR:[8,9],HU:[8,9],IE:[7,9],IL:[8,9],IT:[6,11],LB:[7,8],LT:[8],LU:[6,11],LV:[8],MK:[8],MT:[8],
+  NL:[9],NO:[8],PL:[9],PT:[9],RO:[9],RS:[8,9],RU:[10],SE:[7,9],SI:[8],SK:[9],TR:[10],UA:[9],US:[10]};
+function regionName(c){try{return new Intl.DisplayNames([lang],{type:"region"}).of(c)}catch(_){return c}}
 function renderPhoneCodes(){
-  const sel=$("#phCode"),v=sel.value||"GR";
-  let names=null;try{names=new Intl.DisplayNames([lang],{type:"region"})}catch(_){}
-  const nm=c=>{try{return names?names.of(c):c}catch(_){return c}};
-  const others=PHONE_CODES.slice(2).sort((a,b)=>nm(a[0]).localeCompare(nm(b[0]),lang));
-  sel.innerHTML=[...PHONE_CODES.slice(0,2),...others].map(([c,d])=>`<option value="${c}">+${d} · ${esc(nm(c))}</option>`).join("");
-  sel.value=v;
+  const others=PHONE_CODES.slice(2).sort((a,b)=>regionName(a[0]).localeCompare(regionName(b[0]),lang));
+  const html=[...PHONE_CODES.slice(0,2),...others].map(([c,d])=>`<option value="${c}">+${d} · ${esc(regionName(c))}</option>`).join("");
+  ["#phCode","#evPhCode"].forEach(id=>{const sel=$(id);if(!sel)return;const v=sel.value||"GR";sel.innerHTML=html;sel.value=v});
 }
-const dial=()=>(PHONE_CODES.find(x=>x[0]===$("#phCode").value)||PHONE_CODES[0])[1];
-/* αριθμός + κωδικός χώρας → "+306912345678" (για Hosthub) και "+30 6912345678" (για εμφάνιση) */
-function fullPhone(){
-  const raw=$("#ph").value.trim(),code=dial();
+const dial=(sel="#phCode")=>(PHONE_CODES.find(x=>x[0]===$(sel).value)||PHONE_CODES[0])[1];
+/* αριθμός + κωδικός χώρας → {e164:"+306912345678", disp:"+30 6912345678"} ή null αν δεν ταιριάζει με τη χώρα */
+function fullPhone(codeSel="#phCode",inputSel="#ph"){
+  const raw=$(inputSel).value.trim(),code=dial(codeSel),country=$(codeSel).value||"GR";
   let d=raw.replace(/\D/g,"");
   if(raw.startsWith("+")&&d.startsWith(code)) d=d.slice(code.length);       /* έγραψε και τον κωδικό με + */
   else if(d.startsWith("00"+code)) d=d.slice(2+code.length);                /* ή με 00 */
   if(code!=="30"&&code!=="39"&&d.startsWith("0")) d=d.slice(1);              /* εθνικό πρόθεμα 0 (π.χ. UK 07…) */
-  const ok=code==="30"?d.length===10:d.length>=6&&d.length<=13;
+  const [min,max=min]=PHONE_LEN[country]||[6,13];
+  const ok=d.length>=min&&d.length<=max;
   return ok?{e164:`+${code}${d}`,disp:`+${code} ${d}`}:null;
+}
+/* μήνυμα λάθους για τη χώρα που επιλέχθηκε */
+function phoneErr(codeSel="#phCode"){
+  const c=$(codeSel).value||"GR"; if(c==="GR") return t("e.phoneGR");
+  const L=PHONE_LEN[c]; if(!L) return t("e.phone");
+  return t("e.phoneLen")(regionName(c),L.length>1?`${L[0]}–${L[1]}`:L[0]);
 }
 
 /* βήματα */
@@ -972,7 +987,7 @@ $("#f2").addEventListener("submit",async e=>{
   if(!fn) return fail("#e2",t("e.name"),"#fn");
   if(!ln) return fail("#e2",t("e.name"),"#ln");
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return fail("#e2",t("e.email"),"#em");
-  if(!p) return fail("#e2",t(dial()==="30"?"e.phoneGR":"e.phone"),"#ph");
+  if(!p) return fail("#e2",phoneErr("#phCode"),"#ph");
   if(!$("#ok").checked) return fail("#e2",t("e.ok"),"#ok");
 
   const btn=$("#f2 [type=submit]");
@@ -1090,13 +1105,20 @@ function newBooking(scroll=true){
 }
 $("#again").onclick=()=>newBooking();
 
-/* event enquiry */
-$("#fe").addEventListener("submit",e=>{
-  e.preventDefault();const c=$("#evContact").value.trim();
-  $("#eE").classList.remove("ok");
-  if(!c){fail("#eE",t("eq.empty"),"#evContact");return}
-  const type=$("#evType").selectedOptions[0].textContent;
-  $("#eE").classList.add("ok");$("#eE").textContent=t("eq.ok")(type,c);
+/* αίτημα προσφοράς (Coffee & Bar) → email στον οικοδεσπότη */
+$("#fe").addEventListener("submit",async e=>{
+  e.preventDefault();clearErr("#eE");$("#eE").classList.remove("ok");
+  const em=$("#evEmail").value.trim(),ph=fullPhone("#evPhCode","#evPh");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return fail("#eE",t("eq.email"),"#evEmail");
+  if(!ph) return fail("#eE",phoneErr("#evPhCode"),"#evPh");
+  const opt=$("#evType").selectedOptions[0],type=opt.textContent,kind=opt.dataset.i18n.replace("enq.","");
+  const btn=$("#fe [type=submit]");
+  busy(btn,true,t("f.sending"));
+  const r=await api("/api/enquiry",{kind,date:$("#evDate").value||"",people:+$("#evPeople").value||0,email:em,phone:ph.e164,lang});
+  busy(btn,false);
+  if(!r.ok) return fail("#eE",r.reason==="too_many"?t("eq.many"):r.reason==="invalid_phone"?phoneErr("#evPhCode"):r.reason==="invalid_email"?t("eq.email"):t("x.server"));
+  $("#eE").classList.add("ok");$("#eE").textContent=t("eq.ok")(type);
+  $("#fe").reset();$("#evPhCode").value="GR";$("#evDate").value="";dpRefresh();
 });
 
 /* footer */

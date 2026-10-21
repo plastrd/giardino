@@ -9,6 +9,7 @@
 //   POST /api/verify/send   { email, lang? }  στέλνει νέο τυχαίο 8ψήφιο κωδικό στο email (ακυρώνει τον προηγούμενο)
 //   POST /api/verify/check  { email, code }   ελέγχει τον κωδικό (έως 5 λάθη)
 //   POST /api/verify/reset  { email }         ακυρώνει τον τρέχοντα κωδικό (όταν ο επισκέπτης φεύγει από το βήμα)
+//   POST /api/enquiry { kind, date?, people?, email, phone, lang? }  αίτημα προσφοράς από το Coffee & Bar → email στον οικοδεσπότη
 //   POST /api/book   { slug, checkIn, checkOut, adults, breakfast?, guest:{name,email,phone}, country?, notes?, verifyCode, turnstileToken }
 //
 // Cron (κάθε 10'): τραβάει τιμές + κρατήσεις από Hosthub → ένα JSON στο KV.
@@ -644,6 +645,76 @@ async function sendEmails(env: Env, room: Room, b: BookingInput, p: Pricing, sit
   await Promise.allSettled(jobs);
 }
 
+// ---------- αίτημα προσφοράς (Coffee & Bar) → email στον οικοδεσπότη ----------
+const ENQ_KINDS: Record<string, string> = { o1: "Δεξίωση", o2: "Ιδιωτική εκδήλωση", o3: "Live / μουσική βραδιά", o4: "Εταιρική εκδήλωση" };
+const ENQ_MAX_PER_HOUR = 5;      // αιτήματα ανά IP ανά ώρα (προστασία από spam)
+
+async function enquiry(env: Env, req: Request, b: any) {
+  const email = String(b.email ?? "").trim();
+  const phone = String(b.phone ?? "").replace(/[\s-]/g, "");
+  if (!EMAIL_RE.test(email) || email.length > 200) return json({ ok: false, reason: "invalid_email" }, 400);
+  if (!/^\+\d{8,15}$/.test(phone) || (phone.startsWith("+30") && phone.length !== 13)) return json({ ok: false, reason: "invalid_phone" }, 400);
+  const kind = ENQ_KINDS[String(b.kind)] ?? "Εκδήλωση";
+  const date = DATE_RE.test(String(b.date ?? "")) ? String(b.date) : "";
+  const people = Number.isInteger(b.people) && b.people > 0 && b.people < 10000 ? b.people : null;
+
+  if (!env.RESEND_API_KEY || !env.MAIL_FROM || !env.NOTIFY_EMAIL || !EMAIL_RE.test(env.NOTIFY_EMAIL)) {
+    console.error("enquiry: λείπει RESEND_API_KEY, MAIL_FROM ή NOTIFY_EMAIL");
+    return json({ ok: false, reason: "email_unavailable" }, 503);
+  }
+
+  const ip = req.headers.get("CF-Connecting-IP") ?? "x";
+  const rk = `enq-ip:${ip}`;
+  const n = Number(await env.CACHE.get(rk)) || 0;
+  if (n >= ENQ_MAX_PER_HOUR) return json({ ok: false, reason: "too_many" }, 429);
+
+  const html = enquiryEmailHtml({ kind, date, people, email, phone, lang: b.lang === "en" ? "en" : "el" }, new URL(req.url).origin);
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: env.MAIL_FROM, to: env.NOTIFY_EMAIL, reply_to: email,      // «Απάντηση» → πηγαίνει κατευθείαν στον πελάτη
+      subject: "Ένας πελάτης θέλει κάτι διαφορετικό",
+      html,
+      text: `Νέο αίτημα προσφοράς\n\nΕίδος: ${kind}\nΗμερομηνία: ${date ? bookDay(date, "el") : "—"}\nΆτομα: ${people ?? "—"}\nEmail: ${email}\nΤηλέφωνο: ${phone}\nΓλώσσα πελάτη: ${b.lang === "en" ? "Αγγλικά" : "Ελληνικά"}`,
+    }),
+  });
+  if (!r.ok) {
+    console.error("enquiry email failed", r.status, (await r.text()).slice(0, 300));
+    return json({ ok: false, reason: "email_failed" }, 502);
+  }
+  await env.CACHE.put(rk, String(n + 1), { expirationTtl: 3600 });
+  return json({ ok: true });
+}
+
+function enquiryEmailHtml(e: { kind: string; date: string; people: number | null; email: string; phone: string; lang: "el" | "en" }, site: string) {
+  const rows: [string, string][] = [
+    ["Είδος", escH(e.kind)],
+    ["Ημερομηνία", e.date ? bookDay(e.date, "el") : "—"],
+    ["Άτομα (περίπου)", e.people ? String(e.people) : "—"],
+    ["Email", `<a href="mailto:${escH(e.email)}" style="color:${MC.leaf}">${escH(e.email)}</a>`],
+    ["Τηλέφωνο", `<a href="tel:${escH(e.phone)}" style="color:${MC.leaf};white-space:nowrap">${escH(e.phone)}</a>`],
+    ["Γλώσσα πελάτη", e.lang === "en" ? "Αγγλικά" : "Ελληνικά"],
+  ];
+  const table = rows.map(([k, v], i) =>
+    `<tr><td style="padding:9px 0;${i ? `border-top:1px solid ${MC.line};` : ""}font-size:13px;color:${MC.muted};vertical-align:top;width:40%">${k}</td>` +
+    `<td style="padding:9px 0;${i ? `border-top:1px solid ${MC.line};` : ""}font-size:14px;color:${MC.ink};text-align:right">${v}</td></tr>`).join("");
+  const body = `
+    <tr><td style="padding:22px 24px 0;font-family:${M_SANS};color:${MC.ink}">
+      <h1 style="margin:0 0 6px;font-family:${M_SERIF};font-weight:normal;font-size:24px;line-height:1.2;color:${MC.ink}">Νέο αίτημα προσφοράς</h1>
+      <p style="margin:0;font-size:15px;line-height:1.5;color:${MC.muted}">Ένας πελάτης συμπλήρωσε τη φόρμα «Ζητήστε προσφορά» στο Coffee &amp; Bar.</p>
+    </td></tr>
+    <tr><td style="padding:14px 16px 0">
+      <div style="background:${MC.soft};border-radius:12px;padding:6px 16px">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${M_SANS}">${table}</table>
+      </div>
+    </td></tr>
+    <tr><td style="padding:16px 24px 20px;font-family:${M_SANS}">
+      <p style="margin:0;font-size:13px;line-height:1.55;color:${MC.muted}">Πατώντας «Απάντηση» το email πηγαίνει κατευθείαν στον πελάτη.</p>
+    </td></tr>`;
+  return emailLayout({ lang: "el", site, title: "Νέο αίτημα προσφοράς", preheader: `${e.kind} · ${e.email} · ${e.phone}`, body });
+}
+
 // ---------- router ----------
 const json = (data: unknown, status = 200, extra: HeadersInit = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", ...extra } });
@@ -708,6 +779,11 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext) {
     if (EMAIL_RE.test(email) && email.length <= 200)
       await Promise.all([env.CACHE.delete(otpKey(normEmail(email))), env.CACHE.delete(coolKey(normEmail(email)))]);
     return json({ ok: true });
+  }
+
+  if (p === "/api/enquiry" && req.method === "POST") {
+    const b: any = await req.json().catch(() => ({}));
+    return enquiry(env, req, b);
   }
 
   if (p === "/api/book" && req.method === "POST") {
