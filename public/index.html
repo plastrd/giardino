@@ -276,18 +276,18 @@ try{if(!sessionStorage.getItem("gi-intro"))document.documentElement.classList.ad
 
 <!-- photo lightbox (rooms & bar) -->
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
-  <div class="lb-top"><span class="lb-title" id="lbTitle"></span><span class="lb-count" id="lbCount"></span><button type="button" class="lb-close" id="lbClose" data-i18n-attr="aria-label:lb.close">×</button></div>
+  <div class="lb-top"><span class="lb-title" id="lbTitle"></span><span class="lb-count" id="lbCount"></span><button type="button" class="lb-close" id="lbClose" data-i18n-attr="aria-label:lb.close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="lb-stage" id="lbStage">
-    <button type="button" class="lb-nav lb-prev" id="lbPrev" data-i18n-attr="aria-label:lb.prev">‹</button>
+    <button type="button" class="lb-nav lb-prev" id="lbPrev" data-i18n-attr="aria-label:lb.prev"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg></button>
     <img id="lbImg" alt="">
-    <button type="button" class="lb-nav lb-next" id="lbNext" data-i18n-attr="aria-label:lb.next">›</button>
+    <button type="button" class="lb-nav lb-next" id="lbNext" data-i18n-attr="aria-label:lb.next"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button>
   </div>
   <div class="lb-thumbs" id="lbThumbs"></div>
 </div>
 
 <!-- όροι κράτησης -->
 <dialog class="terms" id="terms" aria-labelledby="termsTitle">
-  <div class="terms-head"><h2 id="termsTitle"></h2><button type="button" class="terms-close" id="termsClose" data-i18n-attr="aria-label:lb.close">×</button></div>
+  <div class="terms-head"><h2 id="termsTitle"></h2><button type="button" class="terms-close" id="termsClose" data-i18n-attr="aria-label:lb.close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="terms-body" id="termsBody"></div>
 </dialog>
 
@@ -776,7 +776,7 @@ function dpRender(){
   }
   const prevOff=dpISO(y,m,1)<=min.slice(0,8)+"01", nextOff=dpISO(y,m,1)>=max.slice(0,8)+"01";
   const legend=id==="co"&&ci?`<p class="cal-legend"><i aria-hidden="true"></i>${t("dp.arr")}: ${new Date(ci+"T12:00").toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"})}</p>`:"";
-  cal.innerHTML=`<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" aria-label="${t("dp.prev")}"${prevOff?" disabled":""}>‹</button><span class="cal-title" aria-live="polite">${title}</span><button type="button" class="cal-nav" data-nav="1" aria-label="${t("dp.next")}"${nextOff?" disabled":""}>›</button></div><div class="cal-grid">${wd}${cells}</div>${legend}`;
+  cal.innerHTML=`<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" aria-label="${t("dp.prev")}"${prevOff?" disabled":""}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg></button><span class="cal-title" aria-live="polite">${title}</span><button type="button" class="cal-nav" data-nav="1" aria-label="${t("dp.next")}"${nextOff?" disabled":""}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button></div><div class="cal-grid">${wd}${cells}</div>${legend}`;
 }
 function dpMove(n){const d=new Date(DP.y,DP.m+n,1);DP.y=d.getFullYear();DP.m=d.getMonth();dpRender()}
 function dpPick(s){
